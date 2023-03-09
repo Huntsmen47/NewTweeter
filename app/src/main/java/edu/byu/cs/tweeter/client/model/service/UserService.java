@@ -1,54 +1,60 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTaskUtils;
+
+import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LoginTaskHandler;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
+import edu.byu.cs.tweeter.client.model.service.handler.LoginHandler;
+import edu.byu.cs.tweeter.client.model.service.handler.LogoutHandler;
+import edu.byu.cs.tweeter.client.model.service.handler.PageHandler;
+import edu.byu.cs.tweeter.client.model.service.handler.RegisterHandler;
+import edu.byu.cs.tweeter.client.model.service.handler.SendUserHandler;
+import edu.byu.cs.tweeter.client.model.service.observer.AuthenticateObserver;
+import edu.byu.cs.tweeter.client.model.service.observer.SendUserObserver;
+import edu.byu.cs.tweeter.client.model.service.observer.SimpleTaskObserver;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-/**
- * Contains the business logic to support the login operation.
- */
-public class UserService {
+public class UserService extends BaseService {
 
-    public static final String URL_PATH = "/login";
-
-    /**
-     * An observer interface to be implemented by observers who want to be notified when
-     * asynchronous operations complete.
-     */
-    public interface LoginObserver {
-        void handleSuccess(User user, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public void getUser(String userAlias, SendUserObserver followingObserver) {
+        GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
+                userAlias, new SendUserHandler(followingObserver));
+        execute(getUserTask);
     }
 
-    /**
-     * Creates an instance.
-     *
-     */
-     public UserService() {
-     }
+    public void logout(SimpleTaskObserver mainObserver) {
+        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(),
+                new LogoutHandler(mainObserver));
+        execute(logoutTask);
 
-    /**
-     * Makes an asynchronous login request.
-     *
-     * @param username the user's name.
-     * @param password the user's password.
-     */
-    public void login(String username, String password, LoginObserver observer) {
-        LoginTask loginTask = getLoginTask(username, password, observer);
-        BackgroundTaskUtils.runTask(loginTask);
     }
 
-    /**
-     * Returns an instance of {@link LoginTask}. Allows mocking of the LoginTask class for
-     * testing purposes. All usages of LoginTask should get their instance from this method to
-     * allow for proper mocking.
-     *
-     * @return the instance.
-     */
-    LoginTask getLoginTask(String username, String password, LoginObserver observer) {
-        return new LoginTask(this, username, password, new LoginTaskHandler(observer));
+    public void login(String alias, String password, AuthenticateObserver loginObserver) {
+        LoginTask loginTask = new LoginTask(alias,
+                password,
+                new LoginHandler(loginObserver));
+        execute(loginTask);
     }
+
+    public void register(String firstName, String lastName, String alias,
+                         String password, String imageBytesBase64, AuthenticateObserver authenticateObserver) {
+        RegisterTask registerTask = new RegisterTask(firstName, lastName,
+                alias, password, imageBytesBase64, new RegisterHandler(authenticateObserver));
+        execute(registerTask);
+    }
+
+
+
+    public void loadMoreItems(User user, int pageSize, Status lastStatus, PagedPresenter.
+            PageClassObserver feedObserver) {
+        GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
+                user, pageSize, lastStatus, new PageHandler<Status>(feedObserver));
+        execute(getFeedTask);
+    }
+
 }

@@ -10,7 +10,7 @@ android {
 
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId "edu.byu.cs.tweeter"
-        minSdkVersion 30
+        minSdkVersion 28
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
