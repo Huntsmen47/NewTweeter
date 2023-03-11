@@ -31,4 +31,8 @@ public class RegisterTask extends AuthenticationTask {
         this.image = image;
     }
 
+    @Override
+    public void doAuthentication() {
+
+    }
 }

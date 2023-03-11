@@ -29,11 +29,13 @@ public abstract class AuthenticationTask extends BackgroundTask {
         this.password = password;
     }
 
-    private Pair<User, AuthToken> doAuthentication() {
-        User authenticatedUser = getFakeData().getFirstUser();
-        AuthToken authToken = getFakeData().getAuthToken();
-        return new Pair<>(authenticatedUser, authToken);
-    }
+    public abstract void doAuthentication();
+
+    /**
+     User authenticatedUser = getFakeData().getFirstUser();
+     AuthToken authToken = getFakeData().getAuthToken();
+     return new Pair<>(authenticatedUser, authToken);
+     */
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
@@ -43,9 +45,22 @@ public abstract class AuthenticationTask extends BackgroundTask {
 
     @Override
     protected void processTask() {
-        Pair<User, AuthToken> authenticationResult = doAuthentication();
+        doAuthentication();
+    }
 
-         authenticatedUser = authenticationResult.getFirst();
-         authToken = authenticationResult.getSecond();
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setAuthenticatedUser(User authenticatedUser) {
+        this.authenticatedUser = authenticatedUser;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 }
