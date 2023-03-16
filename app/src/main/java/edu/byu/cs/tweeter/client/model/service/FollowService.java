@@ -27,7 +27,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService extends BaseService {
 
-
+    public static final String URL_PATH = "/getfollowing";
 
     public void changeToUnfollow(User selectedUser, FollowButtonObserver mainObserver) {
         UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
