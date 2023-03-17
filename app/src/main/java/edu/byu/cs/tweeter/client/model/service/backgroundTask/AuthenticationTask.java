@@ -4,9 +4,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
@@ -34,7 +37,7 @@ public abstract class AuthenticationTask extends BackgroundTask {
         this.password = password;
     }
 
-    public abstract AuthenticationResponse doAuthentication() throws Exception;
+    public abstract AuthenticationResponse doAuthentication() throws IOException, TweeterRemoteException;
 
     /**
      User authenticatedUser = getFakeData().getFirstUser();
@@ -59,7 +62,7 @@ public abstract class AuthenticationTask extends BackgroundTask {
             } else {
                 sendFailedMessage(response.getMessage());
             }
-        } catch (Exception ex) {
+        } catch (IOException |TweeterRemoteException ex) {
             Log.e("AuthenticationTask", ex.getMessage(), ex);
             sendExceptionMessage(ex);
         }
