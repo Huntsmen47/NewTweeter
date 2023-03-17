@@ -1,11 +1,20 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
+import android.util.Log;
 
+import java.io.IOException;
 import java.util.List;
 
+import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
@@ -23,8 +32,25 @@ public class GetFollowersTask extends PagedTask<User> {
 
     @Override
     protected Pair<List<User>, Boolean> getItems() {
-        Pair<List<User>, Boolean> pageOfUsers = getFakeData().getPageOfUsers((User)getLastItem(),
-                getLimit(), getTargetUser());
-        return pageOfUsers;
+        String targetUserAlias = getTargetUser() == null ? null : getTargetUser().getAlias();
+        String lastFollowerAlias = getLastItem() == null ? null : getLastItem().getAlias();
+
+        FollowersRequest request = new FollowersRequest(getAuthToken(),targetUserAlias,
+                getLimit(),lastFollowerAlias);
+
+        try{
+            FollowersResponse response = getServerFacade().getFollowers(request, FollowService.GETFOLLOWERS_PATH);
+            if(response.isSuccess()){
+                return new Pair<>(response.getFollowers(),response.getHasMorePages());
+            }else{
+                sendFailedMessage(response.getMessage());
+            }
+        }catch(IOException | TweeterRemoteException ex){
+            Log.e("Get Followers Task,","Get Followers Task Failed",ex);
+            sendExceptionMessage(ex);
+        }
+
+        System.out.println("You are returning null here in GetFollowersTask, something went wrong here");
+        return null;
     }
 }

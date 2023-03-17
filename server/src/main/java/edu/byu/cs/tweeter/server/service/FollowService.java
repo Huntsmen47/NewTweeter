@@ -1,7 +1,10 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
@@ -30,9 +33,7 @@ public class FollowService {
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request){
-        if(request.getAuthToken() == null){
-            throw new RuntimeException("[Bad Request] Request needs to have a authToken");
-        }else if(request.getAllegedFollowerAlias() == null){
+        if(request.getAllegedFollowerAlias() == null){
             throw new RuntimeException("[Bad Request] Request needs to have an alleged Follower");
         }else if(request.getAllegedFolloweeAlias()==null){
             throw new RuntimeException("[Bad Request] Request needs to have an alleged followee");
@@ -40,6 +41,17 @@ public class FollowService {
 
         return new IsFollowerResponse(true);
     }
+
+    public FollowersResponse getFollowers(FollowersRequest request){
+        if(request.getFolloweeAlias() == null){
+            throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
+        }else if(request.getLimit() <= 0){
+            throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
+        }
+        return getFollowingDAO().getFollowers(request);
+    }
+
+
 
     /**
      * Returns an instance of {@link FollowDAO}. Allows mocking of the FollowDAO class

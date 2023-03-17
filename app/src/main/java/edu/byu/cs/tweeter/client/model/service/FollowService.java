@@ -31,6 +31,8 @@ public class FollowService extends BaseService {
 
     public static final String ISFOLLOWER_PATH = "/isfollower";
 
+    public static final String GETFOLLOWERS_PATH = "/getfollowers";
+
     public void changeToUnfollow(User selectedUser, FollowButtonObserver mainObserver) {
         UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
                 selectedUser, new UnfollowHandler(mainObserver));

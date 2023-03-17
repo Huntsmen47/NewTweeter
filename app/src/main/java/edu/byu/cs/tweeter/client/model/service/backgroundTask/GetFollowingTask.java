@@ -37,7 +37,6 @@ public class GetFollowingTask extends PagedTask<User> {
 
     @Override
     protected Pair<List<User>, Boolean> getItems() {
-        // what does this do?
         String targetUserAlias = getTargetUser() == null ? null : getTargetUser().getAlias();
         String lastFolloweeAlias = getLastItem() == null ? null : getLastItem().getAlias();
 
