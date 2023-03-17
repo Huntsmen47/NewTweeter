@@ -58,7 +58,6 @@ public abstract class AuthenticationTask extends BackgroundTask {
             if (response.isSuccess()) {
                 setAuthenticatedUser(response.getUser());
                 setAuthToken(response.getAuthToken());
-                sendSuccessMessage();
             } else {
                 sendFailedMessage(response.getMessage());
             }

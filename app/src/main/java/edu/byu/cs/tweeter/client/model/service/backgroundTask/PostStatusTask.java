@@ -43,7 +43,6 @@ public class PostStatusTask extends AuthenticatedTask {
         PostStatusResponse response =  getServerFacade().postStatus(request, StatusService.POST_STATUS_PATH);
         if (response.isSuccess()) {
 
-            sendSuccessMessage();
         } else {
             sendFailedMessage(response.getMessage());
         }

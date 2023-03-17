@@ -39,7 +39,6 @@ public class FollowTask extends AuthenticatedTask {
             FollowResponse response =  getServerFacade().follow(followRequest, UserService.FOLLOW_PATH);
             if (response.isSuccess()) {
 
-                sendSuccessMessage();
             } else {
                 sendFailedMessage(response.getMessage());
             }
