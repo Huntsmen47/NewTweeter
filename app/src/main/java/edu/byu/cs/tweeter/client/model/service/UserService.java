@@ -24,6 +24,8 @@ public class UserService extends BaseService {
     public static final String LOGIN_PATH = "/login";
     public static final String REGISTER_PATH = "/register";
 
+    public static final String FOLLOW_PATH = "/follow";
+
     public void getUser(String userAlias, SendUserObserver followingObserver) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 userAlias, new SendUserHandler(followingObserver));

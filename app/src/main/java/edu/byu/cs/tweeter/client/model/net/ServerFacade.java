@@ -3,9 +3,11 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
@@ -48,5 +50,9 @@ public class ServerFacade {
 
     public RegisterResponse register(RegisterRequest request,String urlPath) throws IOException,TweeterRemoteException{
         return clientCommunicator.doPost(urlPath,request,null,RegisterResponse.class);
+    }
+
+    public FollowResponse follow(FollowRequest request,String urlPath) throws IOException,TweeterRemoteException{
+        return clientCommunicator.doPost(urlPath,request,null,FollowResponse.class);
     }
 }
