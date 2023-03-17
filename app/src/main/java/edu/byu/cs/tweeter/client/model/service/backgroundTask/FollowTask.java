@@ -35,8 +35,7 @@ public class FollowTask extends AuthenticatedTask {
     @Override
     protected void processTask() {
         try {
-            AuthToken authToken = new AuthToken();
-            FollowRequest followRequest = new FollowRequest(followee.getAlias(),"currentUser",authToken);
+            FollowRequest followRequest = new FollowRequest(followee.getAlias(),"currentUser",getAuthToken());
             FollowResponse response =  getServerFacade().follow(followRequest, UserService.FOLLOW_PATH);
             if (response.isSuccess()) {
 

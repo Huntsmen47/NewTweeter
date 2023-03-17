@@ -41,11 +41,11 @@ public class GetFollowingTask extends PagedTask<User> {
         String targetUserAlias = getTargetUser() == null ? null : getTargetUser().getAlias();
         String lastFolloweeAlias = getLastItem() == null ? null : getLastItem().getAlias();
 
-        FollowingRequest request = new FollowingRequest(null,targetUserAlias,
+        FollowingRequest request = new FollowingRequest(getAuthToken(),targetUserAlias,
                 getLimit(),lastFolloweeAlias);
 
         try{
-            FollowingResponse response = getServerFacade().getFollowees(request, FollowService.URL_PATH);
+            FollowingResponse response = getServerFacade().getFollowees(request, FollowService.GETFOLLOWING_PATH);
             if(response.isSuccess()){
                 return new Pair<>(response.getFollowees(),response.getHasMorePages());
             }else{
