@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.GetStoryRequest;
+import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.GetStoryResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
-public class StatusDao {
+public class StatusDAO {
     public GetStoryResponse getStory(GetStoryRequest request) {
         assert request.getLimit() > 0;
         assert request.getTargetUserAlias() != null;
@@ -34,6 +36,8 @@ public class StatusDao {
 
     }
 
+
+
     private int getStatusStartingIndex(Status lastStatus, List<Status> allStatus) {
         int statusIndex = 0;
         if(lastStatus != null) {
@@ -57,5 +61,29 @@ public class StatusDao {
 
     private FakeData getFakeData() {
         return FakeData.getInstance();
+    }
+
+    public FeedResponse getFeed(FeedRequest request) {
+        assert request.getLimit() > 0;
+        assert request.getTargetUserAlias() != null;
+
+        List<Status> allStatus = getDummyStatus();
+        List<Status> responseStatuses = new ArrayList<>(request.getLimit());
+
+        boolean hasMorePages = false;
+
+        if(request.getLimit() > 0) {
+            if (allStatus != null) {
+                int statusIndex = getStatusStartingIndex(request.getLastStatus(), allStatus);
+
+                for(int limitCounter = 0; statusIndex < allStatus.size() && limitCounter < request.getLimit(); statusIndex++, limitCounter++) {
+                    responseStatuses.add(allStatus.get(statusIndex));
+                }
+
+                hasMorePages = statusIndex < allStatus.size();
+            }
+        }
+
+        return new FeedResponse(hasMorePages, responseStatuses);
     }
 }

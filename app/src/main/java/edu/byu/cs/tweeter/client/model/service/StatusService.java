@@ -18,6 +18,8 @@ public class StatusService extends BaseService {
 
     public static final String GET_STORY_PATH = "/get_story";
 
+    public static final String GET_FEED_PATH = "/get_feed";
+
     public void makePost(String post, SimpleTaskObserver mainObserver,
                          List<String> parsedUrls,List<String> parsedMentions) {
         Status newStatus = new Status(post, Cache.getInstance().getCurrUser(),
