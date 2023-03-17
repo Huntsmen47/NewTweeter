@@ -2,6 +2,11 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
+
 /**
  * Background task that creates a new user account and logs in the new user (i.e., starts a session).
  */
@@ -32,7 +37,9 @@ public class RegisterTask extends AuthenticationTask {
     }
 
     @Override
-    public void doAuthentication() {
-
+    public AuthenticationResponse doAuthentication() throws Exception {
+        RegisterRequest request = new RegisterRequest(getUsername(),getPassword(),
+                firstName,lastName,image);
+        return getServerFacade().register(request, UserService.REGISTER_PATH);
     }
 }

@@ -2,9 +2,14 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class AuthenticationTask extends BackgroundTask {
@@ -29,7 +34,7 @@ public abstract class AuthenticationTask extends BackgroundTask {
         this.password = password;
     }
 
-    public abstract void doAuthentication();
+    public abstract AuthenticationResponse doAuthentication() throws Exception;
 
     /**
      User authenticatedUser = getFakeData().getFirstUser();
@@ -45,7 +50,19 @@ public abstract class AuthenticationTask extends BackgroundTask {
 
     @Override
     protected void processTask() {
-        doAuthentication();
+        try {
+            AuthenticationResponse response =  doAuthentication();
+            if (response.isSuccess()) {
+                setAuthenticatedUser(response.getUser());
+                setAuthToken(response.getAuthToken());
+                sendSuccessMessage();
+            } else {
+                sendFailedMessage(response.getMessage());
+            }
+        } catch (Exception ex) {
+            Log.e("AuthenticationTask", ex.getMessage(), ex);
+            sendExceptionMessage(ex);
+        }
     }
 
     public String getUsername() {

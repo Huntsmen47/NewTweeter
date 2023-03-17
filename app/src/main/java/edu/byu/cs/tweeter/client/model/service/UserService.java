@@ -21,7 +21,8 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService extends BaseService {
 
-    public static final String URL_PATH = "/login";
+    public static final String LOGIN_PATH = "/login";
+    public static final String REGISTER_PATH = "/register";
 
     public void getUser(String userAlias, SendUserObserver followingObserver) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
