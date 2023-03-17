@@ -47,21 +47,6 @@ public class UserService {
         return new RegisterResponse(user, authToken);
     }
 
-    public FollowResponse follow(FollowRequest request) {
-        if (request.getCurrentUserAlias() == null) {
-            throw new RuntimeException("[Bad Request] Missing current user alias attribute");
-        }
-        if (request.getTargetUserAlias() == null) {
-            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
-        }
-        if (request.getAuthToken() == null) {
-            throw new RuntimeException("[Bad Request] Missing auth token attribute");
-        }
-
-
-        return new FollowResponse();
-    }
-
     /**
      * Returns the dummy user to be returned by the login operation.
      * This is written as a separate method to allow mocking of the dummy user.

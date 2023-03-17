@@ -14,6 +14,8 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService extends BaseService {
 
+    public static final String POST_STATUS_PATH = "/post_status";
+
     public void makePost(String post, SimpleTaskObserver mainObserver,
                          List<String> parsedUrls,List<String> parsedMentions) {
         Status newStatus = new Status(post, Cache.getInstance().getCurrUser(),

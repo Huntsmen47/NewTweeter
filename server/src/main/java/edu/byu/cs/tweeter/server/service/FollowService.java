@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
@@ -49,6 +50,18 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
         return getFollowingDAO().getFollowers(request);
+    }
+
+
+    public FollowResponse follow(FollowRequest request) {
+        if (request.getCurrentUserAlias() == null) {
+            throw new RuntimeException("[Bad Request] Missing current user alias attribute");
+        }
+        if (request.getTargetUserAlias() == null) {
+            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
+        }
+
+        return new FollowResponse();
     }
 
 
