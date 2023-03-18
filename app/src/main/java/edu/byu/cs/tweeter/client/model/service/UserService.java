@@ -28,7 +28,9 @@ public class UserService extends BaseService {
 
     public static final String USER_PATH = "/user";
 
-    public static final String LOGOUT = "/logout";
+    public static final String LOGOUT_PATH = "/logout";
+
+
 
     public void getUser(String userAlias, SendUserObserver followingObserver) {
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),

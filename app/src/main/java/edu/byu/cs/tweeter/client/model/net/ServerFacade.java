@@ -15,6 +15,7 @@ import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
 import edu.byu.cs.tweeter.model.net.request.UserRequest;
 import edu.byu.cs.tweeter.model.net.response.CountResponse;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
@@ -27,6 +28,7 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
+import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 
 /**
@@ -107,5 +109,9 @@ public class ServerFacade {
 
     public CountResponse getFollowingCount(FollowingCountRequest request, String urlPath) throws IOException,TweeterRemoteException{
         return clientCommunicator.doPost(urlPath,request,null,CountResponse.class);
+    }
+
+    public UnfollowResponse unfollow(UnfollowRequest request,String urlPath) throws IOException, TweeterRemoteException{
+        return clientCommunicator.doPost(urlPath,request,null,UnfollowResponse.class);
     }
 }
