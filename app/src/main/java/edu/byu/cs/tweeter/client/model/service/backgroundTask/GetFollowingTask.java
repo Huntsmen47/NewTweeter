@@ -44,7 +44,7 @@ public class GetFollowingTask extends PagedTask<User> {
                 getLimit(),lastFolloweeAlias);
 
         try{
-            FollowingResponse response = getServerFacade().getFollowees(request, FollowService.GETFOLLOWING_PATH);
+            FollowingResponse response = getServerFacade().getFollowees(request, FollowService.GET_FOLLOWING_PATH);
             if(response.isSuccess()){
                 return new Pair<>(response.getFollowees(),response.getHasMorePages());
             }else{

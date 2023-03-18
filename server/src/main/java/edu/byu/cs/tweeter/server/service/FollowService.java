@@ -1,9 +1,12 @@
 package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.CountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
@@ -62,6 +65,21 @@ public class FollowService {
         }
 
         return new FollowResponse();
+    }
+
+    public CountResponse getFollowerCount(FollowerCountRequest request){
+        if(request.getTargetUserAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
+        }
+
+        return new CountResponse(20);
+    }
+
+    public CountResponse getFollowingCount(FollowingCountRequest request){
+        if(request.getTargetUserAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
+        }
+        return new CountResponse(20);
     }
 
 

@@ -8,13 +8,10 @@ import java.io.IOException;
 import java.util.Random;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
-import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 
 /**
@@ -48,7 +45,7 @@ public class IsFollowerTask extends AuthenticatedTask {
     protected void processTask() {
         try {
             IsFollowerRequest request = new IsFollowerRequest(follower.getAlias(),followee.getAlias(),getAuthToken());
-            IsFollowerResponse response =  getServerFacade().isFollower(request, FollowService.ISFOLLOWER_PATH);
+            IsFollowerResponse response =  getServerFacade().isFollower(request, FollowService.IS_FOLLOWER_PATH);
             if (response.isSuccess()) {
 
             } else {

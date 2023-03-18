@@ -22,16 +22,19 @@ import edu.byu.cs.tweeter.client.model.service.observer.CountObserver;
 import edu.byu.cs.tweeter.client.model.service.observer.FollowButtonObserver;
 import edu.byu.cs.tweeter.client.model.service.observer.IsFollowObserver;
 import edu.byu.cs.tweeter.client.model.service.observer.PageObserver;
-import edu.byu.cs.tweeter.client.model.service.observer.ServiceObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService extends BaseService {
 
-    public static final String GETFOLLOWING_PATH = "/getfollowing";
+    public static final String GET_FOLLOWING_PATH = "/getfollowing";
 
-    public static final String ISFOLLOWER_PATH = "/isfollower";
+    public static final String IS_FOLLOWER_PATH = "/isfollower";
 
-    public static final String GETFOLLOWERS_PATH = "/getfollowers";
+    public static final String GET_FOLLOWERS_PATH = "/getfollowers";
+
+    public static final String FOLLOWER_COUNT_PATH = "/get_follower_count";
+
+    public static final String FOLLOWING_COUNT_PATH = "/get_following_count";
 
     public void changeToUnfollow(User selectedUser, FollowButtonObserver mainObserver) {
         UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
