@@ -1,7 +1,18 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
+import edu.byu.cs.tweeter.model.net.response.CountResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
+import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 
 /**
@@ -26,6 +37,77 @@ public class FollowService {
         }
         return getFollowingDAO().getFollowees(request);
     }
+
+    public IsFollowerResponse isFollower(IsFollowerRequest request){
+        if(request.getAllegedFollowerAlias() == null){
+            throw new RuntimeException("[Bad Request] Request needs to have an alleged Follower");
+        }else if(request.getAllegedFolloweeAlias()==null){
+            throw new RuntimeException("[Bad Request] Request needs to have an alleged followee");
+        }
+
+        return new IsFollowerResponse(true);
+    }
+
+    public FollowersResponse getFollowers(FollowersRequest request){
+        if(request.getFolloweeAlias() == null){
+            throw new RuntimeException("[Bad Request] Request needs to have a followee alias");
+        }else if(request.getLimit() <= 0){
+            throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
+        }
+        return getFollowingDAO().getFollowers(request);
+    }
+
+
+    public FollowResponse follow(FollowRequest request) {
+        String debugMessage = "Follow";
+        String debug1 = String.format("FolloweeAlias: %s",request.getFolloweeAlias());
+        String debug2 = String.format("FollowerAlias: %s",request.getFollowerAlias());
+        System.out.println(debugMessage);
+        System.out.println(debug1);
+        System.out.println(debug2);
+        if (request.getFolloweeAlias() == null) {
+            throw new RuntimeException("[Bad Request] Missing followee user alias attribute");
+        }
+        if (request.getFollowerAlias() == null) {
+          //  throw new RuntimeException("[Bad Request] Missing follower user alias attribute");
+        }
+
+        return new FollowResponse();
+    }
+
+    public CountResponse getFollowerCount(FollowerCountRequest request){
+        if(request.getTargetUserAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
+        }
+
+        return new CountResponse(20);
+    }
+
+    public CountResponse getFollowingCount(FollowingCountRequest request){
+        if(request.getTargetUserAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing target user alias attribute");
+        }
+        return new CountResponse(20);
+    }
+
+    public UnfollowResponse unfollow(UnfollowRequest request){
+        String debugMessage = "Unfollow";
+        String debug1 = String.format("FolloweeAlias: %s",request.getFolloweeAlias());
+        String debug2 = String.format("FollowerAlias: %s",request.getFollowerAlias());
+        System.out.println(debugMessage);
+        System.out.println(debug1);
+        System.out.println(debug2);
+        if (request.getFolloweeAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing followee user alias");
+        }
+        if(request.getFollowerAlias() == null){
+            throw new RuntimeException("[Bad Request] Missing follower user alias");
+        }
+
+        return new UnfollowResponse();
+    }
+
+
 
     /**
      * Returns an instance of {@link FollowDAO}. Allows mocking of the FollowDAO class

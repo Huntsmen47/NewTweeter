@@ -2,9 +2,16 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
+import java.io.IOException;
+
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.UserRequest;
+import edu.byu.cs.tweeter.model.net.response.UserResponse;
 
 /**
  * Background task that returns the profile for a specified user.
@@ -31,7 +38,18 @@ public class GetUserTask extends AuthenticatedTask {
 
     @Override
     protected void processTask() {
-         user = getUser();
+         try {
+             UserRequest request = new UserRequest(alias,getAuthToken());
+             UserResponse response = getServerFacade().getUser(request, UserService.USER_PATH);
+             if(response.isSuccess()){
+                 user = response.getUser();
+             }else{
+                 sendFailedMessage(response.getMessage());
+             }
+         }catch (IOException | TweeterRemoteException ex){
+             Log.e("UserTask",ex.getMessage(),ex);
+             sendExceptionMessage(ex);
+         }
     }
 
     @Override
@@ -39,10 +57,7 @@ public class GetUserTask extends AuthenticatedTask {
         msgBundle.putSerializable(USER_KEY, user);
     }
 
-    private User getUser() {
-        user = getFakeData().findUserByAlias(alias);
-        return user;
-    }
+
 
 
 }

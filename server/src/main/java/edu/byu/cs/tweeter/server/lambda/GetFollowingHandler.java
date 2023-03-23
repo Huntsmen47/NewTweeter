@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.lambda;
 
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
@@ -23,6 +24,7 @@ public class GetFollowingHandler implements RequestHandler<FollowingRequest, Fol
      */
     @Override
     public FollowingResponse handleRequest(FollowingRequest request, Context context) {
+        System.out.println("Handling request in GetFollowing Handler");
         FollowService service = new FollowService();
         return service.getFollowees(request);
     }
