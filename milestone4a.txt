@@ -25,4 +25,12 @@ How do I get this import to work for my gradle project?
     	  implementation("software.amazon.awssdk:dynamodb-enhanced")
 
 How should I implement abstract factory pattern with my DAO's?
-	- 
+	-
+
+
+In regards to my DAO interface, what should my last item datatype be?
+	- I think in order to answer this question, I am going to need to look at all the last item types for each
+	  case.
+	- What are all the types of each lastItem?
+		- User it's a string for userAlias
+		-  
