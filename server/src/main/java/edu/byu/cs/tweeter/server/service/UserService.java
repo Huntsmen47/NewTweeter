@@ -14,6 +14,7 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
+import edu.byu.cs.tweeter.server.dto.UserDTO;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
@@ -48,6 +49,14 @@ public class UserService {
             throw new RuntimeException("[Bad Request] Missing image attribute");
         }
 
+        // create UserDTO
+        // put this in DataBase (in order to implement this part you need to apply abstract factory pattern)
+        // Translate UserDTO to User model object
+        // create authToken
+        // create response that includes user and authToken and return it.
+
+        UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
+                request.getUsername(),request.getImage(),request.getPassword());
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new RegisterResponse(user, authToken);
@@ -93,5 +102,9 @@ public class UserService {
      */
     FakeData getFakeData() {
         return FakeData.getInstance();
+    }
+
+    boolean validatePassword(String userAlias,String password){
+        return true;
     }
 }

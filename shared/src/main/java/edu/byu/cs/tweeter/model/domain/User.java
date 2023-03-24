@@ -3,6 +3,8 @@ package edu.byu.cs.tweeter.model.domain;
 import java.io.Serializable;
 import java.util.Objects;
 
+
+
 /**
  * Represents a user in the system.
  */
@@ -16,6 +18,7 @@ public class User implements Comparable<User>, Serializable {
     /**
      * Allows construction of the object from Json. Private so it won't be called by other code.
      */
+
     private User() {}
 
     public User(String firstName, String lastName, String imageURL) {
