@@ -5,15 +5,19 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 public class UserDTO {
     private String firstName;
     private String lastName;
-    private String alias;
+    private String userAlias;
     private String imageUrl;
 
     private String password;
 
-    public UserDTO(String firstName, String lastName, String alias, String imageUrl,String password) {
+    public UserDTO(){
+
+    }
+
+    public UserDTO(String firstName, String lastName, String userAlias, String imageUrl, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.alias = alias;
+        this.userAlias = userAlias;
         this.imageUrl = imageUrl;
         this.password = password;
     }
@@ -35,12 +39,12 @@ public class UserDTO {
     }
 
     @DynamoDbPartitionKey
-    public String getAlias() {
-        return alias;
+    public String getUserAlias() {
+        return userAlias;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setUserAlias(String userAlias) {
+        this.userAlias = userAlias;
     }
 
     public String getImageUrl() {
