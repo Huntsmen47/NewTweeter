@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -7,6 +8,7 @@ import java.util.Base64;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
@@ -35,7 +37,7 @@ public class UserService {
     private static final SecureRandom secureRandom = new SecureRandom(); //threadsafe
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder(); //threadsafe
 
-    public static String generateNewToken() {
+    private static String generateNewToken() {
         byte[] randomBytes = new byte[24];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);
@@ -48,6 +50,16 @@ public class UserService {
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[Bad Request] Missing a password");
         }
+
+        // check if user name exists
+            // if not state that password is incorrect
+        // if so match given password with actual password
+            // if match log userIn with authtoken
+        // if not declare that password is incorrect
+
+        daoFactory = createDAOFactory();
+        UserDAO userDAO = daoFactory.makeUserDao();
+        if(userDAO.isInDatabase(request.getUsername()));
 
         // TODO: Generates dummy data. Replace with a real implementation.
         User user = getDummyUser();
@@ -73,8 +85,8 @@ public class UserService {
             throw new RuntimeException("[Bad Request] Missing image attribute");
         }
 
-        // is this a bad dependency vvv
-        daoFactory = new ConcreteDaoFactory();
+
+        daoFactory = createDAOFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
         ImageDAO imageDAO = daoFactory.makeImageDao();
         AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
@@ -92,7 +104,7 @@ public class UserService {
                     ,authToken.datetime);
             authTokenDAO.addItem(authTokenDTO,authTokenDTO.getUserAlias());
         } catch (DataAccessException ex){
-            System.out.println(ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
 
         return new RegisterResponse(user, authToken);
@@ -173,5 +185,13 @@ public class UserService {
             e.printStackTrace();
         }
         return "FAILED TO HASH";
+    }
+
+    private DAOFactory createDAOFactory(){
+        if(daoFactory == null){
+            // is this a bad dependency vvv
+            daoFactory = new ConcreteDaoFactory();
+        }
+        return daoFactory;
     }
 }

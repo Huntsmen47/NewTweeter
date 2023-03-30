@@ -8,4 +8,6 @@ public interface UserDAO extends AliasPartitionDAO<UserDTO>{
     void updateUser (UserDTO user) throws DataAccessException;
 
     String getPassword(String userAlias) throws DataAccessException;
+
+
 }
