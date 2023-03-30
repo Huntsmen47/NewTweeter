@@ -1,5 +1,8 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -53,20 +56,16 @@ public class UserService {
             throw new RuntimeException("[Bad Request] Missing image attribute");
         }
 
-        // create UserDTO
-        // put this in DataBase (in order to implement this part you need to apply abstract factory pattern)
-        // Translate UserDTO to User model object
-        // create authToken
-        // create response that includes user and authToken and return it.
-        // possible unwanted dependency with ConcreteDaoFactory talk with TA
+        // is this a bad dependency vvv
         daoFactory = new ConcreteDaoFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
         ImageDAO imageDAO = daoFactory.makeImageDao();
 
+        String hashedPassword = hashPassword(request.getPassword());
 
         UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
                 request.getUsername(), imageDAO.uploadImage(request.getImage(),request.getUsername()),
-                request.getPassword());
+                hashedPassword);
         try{
             userDAO.addItem(userDTO,userDTO.getUserAlias());
         } catch (DataAccessException ex){
@@ -137,5 +136,21 @@ public class UserService {
         User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
                 userDTO.getUserAlias(),userDTO.getImageUrl());
         return user;
+    }
+
+    private static String hashPassword(String passwordToHash) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(passwordToHash.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "FAILED TO HASH";
     }
 }
