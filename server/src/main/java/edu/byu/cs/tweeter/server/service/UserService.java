@@ -11,12 +11,13 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
-import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
-import edu.byu.cs.tweeter.server.dao.ImageDAO;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.FakeData;
+
 
 public class UserService {
 
@@ -62,11 +63,12 @@ public class UserService {
         UserDAO userDAO = daoFactory.makeUserDao();
         ImageDAO imageDAO = daoFactory.makeImageDao();
 
+
         UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
                 request.getUsername(), imageDAO.uploadImage(request.getImage(),request.getUsername()),
                 request.getPassword());
         try{
-            userDAO.addUser(userDTO);
+            userDAO.addItem(userDTO,userDTO.getUserAlias());
         } catch (DataAccessException ex){
             System.out.println(ex.getMessage());
         }

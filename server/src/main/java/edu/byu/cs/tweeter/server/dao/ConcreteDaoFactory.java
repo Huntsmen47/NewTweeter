@@ -1,6 +1,10 @@
 package edu.byu.cs.tweeter.server.dao;
 
-public class ConcreteDaoFactory implements DAOFactory{
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
+
+public class ConcreteDaoFactory implements DAOFactory {
     @Override
     public UserDAO makeUserDao() {
         return new ConcreteUserDAO();

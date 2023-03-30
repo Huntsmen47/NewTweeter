@@ -9,7 +9,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 
-public class ConcreteImageDao implements ImageDAO{
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
+
+public class ConcreteImageDao implements ImageDAO {
 
 
     @Override
@@ -30,7 +32,11 @@ public class ConcreteImageDao implements ImageDAO{
         PutObjectRequest request = new PutObjectRequest("my4700craybuck", userAlias,
                 new ByteArrayInputStream(byteArray), data).withCannedAcl(CannedAccessControlList.PublicRead);
 
+
+
         s3.putObject(request);
+
+
 
        String link = "https://my4700craybuck.s3.us-east-1.amazonaws.com/" + userAlias;
        return link;

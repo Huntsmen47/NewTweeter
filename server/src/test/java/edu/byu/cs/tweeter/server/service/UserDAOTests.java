@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import edu.byu.cs.tweeter.server.dao.ConcreteUserDAO;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
