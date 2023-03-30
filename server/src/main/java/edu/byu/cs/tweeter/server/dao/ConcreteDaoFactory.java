@@ -5,4 +5,9 @@ public class ConcreteDaoFactory implements DAOFactory{
     public UserDAO makeUserDao() {
         return new ConcreteUserDAO();
     }
+
+    @Override
+    public ImageDAO makeImageDao() {
+        return new ConcreteImageDao();
+    }
 }

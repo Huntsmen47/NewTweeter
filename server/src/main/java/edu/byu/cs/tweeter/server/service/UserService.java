@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
+import edu.byu.cs.tweeter.server.dao.ImageDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.FakeData;
@@ -56,12 +57,14 @@ public class UserService {
         // Translate UserDTO to User model object
         // create authToken
         // create response that includes user and authToken and return it.
-
-        UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
-                request.getUsername(),request.getImage(),request.getPassword());
-                     // possible unwanted dependency with ConcreteDaoFactory talk with TA
+        // possible unwanted dependency with ConcreteDaoFactory talk with TA
         daoFactory = new ConcreteDaoFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
+        ImageDAO imageDAO = daoFactory.makeImageDao();
+
+        UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
+                request.getUsername(), imageDAO.uploadImage(request.getImage(),request.getUsername()),
+                request.getPassword());
         try{
             userDAO.addUser(userDTO);
         } catch (DataAccessException ex){
@@ -128,7 +131,7 @@ public class UserService {
      * @param userDTO
      * @return
      */
-    public User convertUserDTO(UserDTO userDTO) throws NullPointerException{
+    public User convertUserDTO(UserDTO userDTO) {
         User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
                 userDTO.getUserAlias(),userDTO.getImageUrl());
         return user;

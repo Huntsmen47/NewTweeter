@@ -30,6 +30,7 @@ How should I implement abstract factory pattern with my DAO's?
 
 How do I upload an image to S3?
 	- Go to role associated with lambda, and give it access to S3...
+	- 
 
 
 What's the difference between enhanced client and non enhanced client in

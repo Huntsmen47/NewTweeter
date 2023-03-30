@@ -21,6 +21,10 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:2.18.10"))
     implementation("software.amazon.awssdk:dynamodb")
     implementation("software.amazon.awssdk:dynamodb-enhanced")
+// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.437'
+
+
 
 
     // Testing related dependencies
