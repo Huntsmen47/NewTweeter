@@ -2,6 +2,8 @@ package edu.byu.cs.tweeter.server.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -14,17 +16,31 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.AuthTokenDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dto.AuthTokenDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.FakeData;
+
 
 
 public class UserService {
 
     private DAOFactory daoFactory;
+
+
+    private static final SecureRandom secureRandom = new SecureRandom(); //threadsafe
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder(); //threadsafe
+
+    public static String generateNewToken() {
+        byte[] randomBytes = new byte[24];
+        secureRandom.nextBytes(randomBytes);
+        return base64Encoder.encodeToString(randomBytes);
+    }
+
 
     public LoginResponse login(LoginRequest request) {
         if(request.getUsername() == null){
@@ -35,7 +51,8 @@ public class UserService {
 
         // TODO: Generates dummy data. Replace with a real implementation.
         User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
+        AuthToken authToken = new AuthToken(generateNewToken(),System.currentTimeMillis());
+        // put authToken in database when login is ready
         return new LoginResponse(user, authToken);
     }
 
@@ -60,20 +77,24 @@ public class UserService {
         daoFactory = new ConcreteDaoFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
         ImageDAO imageDAO = daoFactory.makeImageDao();
+        AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
 
         String hashedPassword = hashPassword(request.getPassword());
 
         UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
                 request.getUsername(), imageDAO.uploadImage(request.getImage(),request.getUsername()),
                 hashedPassword);
+        User user = convertUserDTO(userDTO);
+        AuthToken authToken = new AuthToken(generateNewToken(),System.currentTimeMillis());
         try{
             userDAO.addItem(userDTO,userDTO.getUserAlias());
+            AuthTokenDTO authTokenDTO = new AuthTokenDTO(request.getUsername(),authToken.token
+                    ,authToken.datetime);
+            authTokenDAO.addItem(authTokenDTO,authTokenDTO.getUserAlias());
         } catch (DataAccessException ex){
             System.out.println(ex.getMessage());
         }
 
-        User user = convertUserDTO(userDTO);
-        AuthToken authToken = getDummyAuthToken();
         return new RegisterResponse(user, authToken);
     }
 

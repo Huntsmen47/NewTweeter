@@ -71,7 +71,7 @@ public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
     protected DynamoDbEnhancedClient getEnhancedClient(){
         if(enhancedClient == null){
             enhancedClient = DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(dynamoDbClient)
+                    .dynamoDbClient(getDynamoDbClient())
                     .build();
         }
         return enhancedClient;
