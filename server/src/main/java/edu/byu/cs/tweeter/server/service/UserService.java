@@ -10,10 +10,16 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
-import edu.byu.cs.tweeter.server.dto.UserDTO;
+import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.DataAccessException;
+import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
+
+    private DAOFactory daoFactory;
 
     public LoginResponse login(LoginRequest request) {
         if(request.getUsername() == null){
@@ -53,7 +59,16 @@ public class UserService {
 
         UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
                 request.getUsername(),request.getImage(),request.getPassword());
-        User user = getDummyUser();
+                     // possible unwanted dependency with ConcreteDaoFactory talk with TA
+        daoFactory = new ConcreteDaoFactory();
+        UserDAO userDAO = daoFactory.makeUserDao();
+        try{
+            userDAO.addUser(userDTO);
+        } catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+
+        User user = convertUserDTO(userDTO);
         AuthToken authToken = getDummyAuthToken();
         return new RegisterResponse(user, authToken);
     }
@@ -102,5 +117,20 @@ public class UserService {
 
     boolean validatePassword(String userAlias,String password){
         return true;
+    }
+
+    /**
+     * Pre-Conditions
+     * - userDTO cannot be null
+     * - userDTO must have non null firstName, lastName, userAlias, imageUrl
+     * Post-Conditions
+     * - user returned with non null firstName, lastName, userAlias, imageUrl
+     * @param userDTO
+     * @return
+     */
+    public User convertUserDTO(UserDTO userDTO) throws NullPointerException{
+        User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
+                userDTO.getUserAlias(),userDTO.getImageUrl());
+        return user;
     }
 }

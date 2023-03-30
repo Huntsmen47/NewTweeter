@@ -1,7 +1,6 @@
 package edu.byu.cs.tweeter.server.dao;
 
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.server.dto.UserDTO;
+import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -34,7 +33,7 @@ public class ConcreteUserDAO implements UserDAO{
      * @return User of corresponding userAlias
      */
     @Override
-    public User getUser(String userAlias) throws DataAccessException {
+    public UserDTO getUser(String userAlias) throws DataAccessException {
         if(userAlias == null){
             throw new DataAccessException("User alias is null");
         }
@@ -46,7 +45,7 @@ public class ConcreteUserDAO implements UserDAO{
         if(user == null){
             throw new DataAccessException("Requested User Alias does not exist in Database");
         }
-        return convertUserDTO(user);
+        return user;
     }
 
     /**
@@ -67,7 +66,7 @@ public class ConcreteUserDAO implements UserDAO{
         } else if(user.getUserAlias() == null){
             throw new DataAccessException("userAlias is null, cannot add");
         }
-        if(!isInDatabase(user.getUserAlias())){
+        if(isInDatabase(user.getUserAlias())){
             throw new DataAccessException("user is already in database");
         }
         DynamoDbTable<UserDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(UserDTO.class));
@@ -77,9 +76,9 @@ public class ConcreteUserDAO implements UserDAO{
     private boolean isInDatabase(String userAlias){
         try {
             getUser(userAlias);
-            return false;
-        } catch (DataAccessException ex){
             return true;
+        } catch (DataAccessException ex){
+            return false;
         }
     }
 
@@ -112,26 +111,50 @@ public class ConcreteUserDAO implements UserDAO{
      * - passed in user must not be null
      * - userAlias is not null
      *
+     * Post-Conditions:
+     * - Update will reflect in the database
+     *
      * @param user
      */
     @Override
-    public void updateUser(UserDTO user) {
+    public void updateUser(UserDTO user) throws DataAccessException {
+        if(user == null){
+            throw new DataAccessException("User is null, cannot update");
+        } else if (user.getUserAlias() == null) {
+            throw new DataAccessException("User has nullAlias, cannot update");
+        } else if (!isInDatabase(user.getUserAlias())) {
+            throw new DataAccessException("User not in database, can't update");
+        }
+
+        DynamoDbTable<UserDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(UserDTO.class));
+        table.updateItem(user);
 
     }
 
+
+    /**
+     * Pre-Conditions
+     * - userAlias is not null
+     * - userAlias is in database
+     * Post-Conditions
+     * - password of corresponding user is returned
+     * @param userAlias
+     * @return
+     */
     @Override
-    public DataPage<User> getPageOfUsers(int pageSize, String lastUserAlias) {
-        return null;
+    public String getPassword(String userAlias) throws DataAccessException {
+        if(userAlias == null){
+            throw new DataAccessException("null alias, cannot get password");
+        }else if(!isInDatabase(userAlias)){
+            throw new DataAccessException("alias not in database, cannot get user");
+        }
+        DynamoDbTable<UserDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(UserDTO.class));
+        Key key = Key.builder()
+                .partitionValue(userAlias)
+                .build();
+        UserDTO user = table.getItem(key);
+        return user.getPassword();
     }
 
-    @Override
-    public String getPassword(String userAlias) {
-        return null;
-    }
 
-    private User convertUserDTO(UserDTO userDTO){
-        User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
-                userDTO.getUserAlias(),userDTO.getImageUrl());
-        return user;
-    }
 }
