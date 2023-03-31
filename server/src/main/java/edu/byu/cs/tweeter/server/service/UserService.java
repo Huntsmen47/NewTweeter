@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.server.service;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -8,7 +7,6 @@ import java.util.Base64;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
@@ -18,9 +16,9 @@ import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
+import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.AuthTokenDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
-import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.AuthTokenDTO;
@@ -51,21 +49,31 @@ public class UserService {
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        // check if user name exists
-            // if not state that password is incorrect
-        // if so match given password with actual password
-            // if match log userIn with authtoken
-        // if not declare that password is incorrect
-
         daoFactory = createDAOFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
+        AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
         if(!userDAO.isInDatabase(request.getUsername())){
             return new LoginResponse("\nincorrect password");
         }
-
-        // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
+        User user;
         AuthToken authToken = new AuthToken(generateNewToken(),System.currentTimeMillis());
+        AuthTokenDTO authTokenDTO = new AuthTokenDTO(request.getUsername(),authToken.token
+                ,authToken.datetime);
+        try {
+            String givenPasswordHashed = hashPassword(request.getPassword());
+            String actualPasswordHashed = userDAO.getPassword(request.getUsername());
+            if(givenPasswordHashed.equals(actualPasswordHashed)){
+                user = convertUserDTO(userDAO.getItem(request.getUsername()));
+                authTokenDAO.addItem(authTokenDTO,request.getUsername());
+            } else {
+                return new LoginResponse("\nincorrect password");
+            }
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            return new LoginResponse("\n sorry there is an internal issue");
+        }
+
+
         // put authToken in database when login is ready
         return new LoginResponse(user, authToken);
     }
@@ -122,6 +130,15 @@ public class UserService {
     }
 
     public LogoutResponse logout(LogoutRequest request){
+
+        try {
+            AuthTokenDAO authTokenDAO = createDAOFactory().makeAuthTokenDao();
+            authTokenDAO.deleteItem(request.getAuthToken().token);
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            System.out.println("Problem with deleting authtoken on logout");
+        }
+
         return new LogoutResponse();
     }
 

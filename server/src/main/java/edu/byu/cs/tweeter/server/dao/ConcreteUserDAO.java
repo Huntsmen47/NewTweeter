@@ -6,7 +6,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
-public class ConcreteUserDAO extends AliasPartitionBase<UserDTO> implements UserDAO {
+public class ConcreteUserDAO extends StringPartitionBase<UserDTO> implements UserDAO {
 
     private static final String TableName = "User";
 

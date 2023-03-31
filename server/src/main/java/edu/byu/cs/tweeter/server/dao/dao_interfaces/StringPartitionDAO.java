@@ -2,7 +2,7 @@ package edu.byu.cs.tweeter.server.dao.dao_interfaces;
 
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
 
-public interface AliasPartitionDAO<T> {
+public interface StringPartitionDAO<T> {
 
     T getItem(String userAlias) throws DataAccessException;
     void addItem(T item,String userAlias) throws  DataAccessException;

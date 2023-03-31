@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.server.dao.dto;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
@@ -20,7 +19,7 @@ public class AuthTokenDTO {
     public AuthTokenDTO(){
 
     }
-
+    @DynamoDbPartitionKey
     public String getToken() {
         return token;
     }
@@ -43,7 +42,7 @@ public class AuthTokenDTO {
         this.datetime = datetime;
     }
 
-    @DynamoDbPartitionKey
+
     public String getUserAlias() {
         return userAlias;
     }

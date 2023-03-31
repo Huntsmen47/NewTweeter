@@ -1,11 +1,11 @@
 package edu.byu.cs.tweeter.server.dao;
 
-import edu.byu.cs.tweeter.server.dao.dao_interfaces.AliasPartitionDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.StringPartitionDAO;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
+public abstract class StringPartitionBase<T> implements StringPartitionDAO<T> {
 
     private static DynamoDbClient dynamoDbClient;
     private static DynamoDbEnhancedClient enhancedClient;
@@ -13,13 +13,13 @@ public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
     @Override
     public T getItem(String userAlias) throws DataAccessException{
         if(userAlias == null){
-            throw new DataAccessException("User alias is null");
+            throw new DataAccessException("Item is null");
         }
 
         T item = getItemFromDB(userAlias);
 
         if(item == null){
-            throw new DataAccessException("Requested User Alias does not exist in Database");
+            throw new DataAccessException("Requested Item does not exist in Database");
         }
         return item;
     }
@@ -29,12 +29,12 @@ public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
     @Override
     public void addItem(T item,String userAlias) throws DataAccessException {
         if(item == null){
-            throw new DataAccessException("Cannot add null user");
+            throw new DataAccessException("Cannot add null item");
         } else if(userAlias == null){
-            throw new DataAccessException("userAlias is null, cannot add");
+            throw new DataAccessException("Partition key is null on item, cannot add");
         }
         if(isInDatabase(userAlias)){
-            throw new DataAccessException("user alias already taken");
+            throw new DataAccessException("partition key for item already in use");
         }
         putItemInDB(item);
 

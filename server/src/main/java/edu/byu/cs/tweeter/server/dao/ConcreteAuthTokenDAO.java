@@ -6,9 +6,10 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
-public class ConcreteAuthTokenDAO extends AliasPartitionBase<AuthTokenDTO> implements AuthTokenDAO {
+public class ConcreteAuthTokenDAO extends StringPartitionBase<AuthTokenDTO> implements AuthTokenDAO {
 
-    private static final String TableName = "Authtoken";
+    private static final String TableName = "AuthToken";
+
 
     @Override
     protected AuthTokenDTO getItemFromDB(String userAlias) {

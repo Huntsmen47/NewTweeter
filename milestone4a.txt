@@ -46,6 +46,4 @@ What are the requirements the authtoken?
 	  have "authtoken", "userAlias", "timeStamp"
 
 
-
-WorkStatus:
-- Currently working on register with DynamoDB, next thing to do is implement  your interfaces then get userservice connected 
+permanently delete
