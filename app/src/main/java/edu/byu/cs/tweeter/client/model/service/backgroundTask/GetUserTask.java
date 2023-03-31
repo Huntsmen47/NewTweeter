@@ -12,6 +12,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.UserRequest;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that returns the profile for a specified user.
@@ -37,18 +38,19 @@ public class GetUserTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
          try {
              UserRequest request = new UserRequest(alias,getAuthToken());
              UserResponse response = getServerFacade().getUser(request, UserService.USER_PATH);
              if(response.isSuccess()){
                  user = response.getUser();
+                 return new Pair<Boolean,String>(true,"");
              }else{
-                 sendFailedMessage(response.getMessage());
+                 return new Pair<Boolean,String>(false,response.getMessage());
              }
          }catch (IOException | TweeterRemoteException ex){
              Log.e("UserTask",ex.getMessage(),ex);
-             sendExceptionMessage(ex);
+             return new Pair<Boolean,String>(false, ex.getMessage());
          }
     }
 

@@ -5,10 +5,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+
 import androidx.annotation.NonNull;
 
 import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class BackgroundTask implements Runnable {
 
@@ -73,9 +75,13 @@ public abstract class BackgroundTask implements Runnable {
     @Override
     public void run() {
         try {
-            processTask();
 
-            sendSuccessMessage();
+            Pair<Boolean,String> response = processTask();
+            if(response.getFirst()){
+                sendSuccessMessage();
+            } else{
+                sendFailedMessage(response.getSecond());
+            }
 
         } catch (Exception ex) {
             Log.e(LOG_TAG, "Failed", ex);
@@ -92,7 +98,7 @@ public abstract class BackgroundTask implements Runnable {
         return serverFacade;
     }
 
-    protected abstract void processTask();
+    protected abstract Pair processTask();
 
     protected abstract void loadSuccessBundle(Bundle msgBundle);
 

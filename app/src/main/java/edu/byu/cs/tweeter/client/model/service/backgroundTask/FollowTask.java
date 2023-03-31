@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticationResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that establishes a following relationship between two users.
@@ -33,18 +34,18 @@ public class FollowTask extends AuthenticatedTask {
 
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try {
             FollowRequest followRequest = new FollowRequest(followee.getAlias(),"currentUser",getAuthToken());
             FollowResponse response =  getServerFacade().follow(followRequest, UserService.FOLLOW_PATH);
             if (response.isSuccess()) {
-
+                return new Pair<Boolean,String>(true,"");
             } else {
-                sendFailedMessage(response.getMessage());
+                return new Pair<Boolean,String>(false,response.getMessage());
             }
         } catch (IOException | TweeterRemoteException ex) {
             Log.e("FollowTask", ex.getMessage(), ex);
-            sendExceptionMessage(ex);
+            return new Pair<Boolean,String>(false,ex.getMessage());
         }
 
     }

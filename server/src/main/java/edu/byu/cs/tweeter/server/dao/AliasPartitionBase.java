@@ -13,13 +13,13 @@ public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
     @Override
     public T getItem(String userAlias) throws DataAccessException{
         if(userAlias == null){
-            throw new DataAccessException("[Bad Request] User alias is null");
+            throw new DataAccessException("User alias is null");
         }
 
         T item = getItemFromDB(userAlias);
 
         if(item == null){
-            throw new DataAccessException("[Bad Request] Requested User Alias does not exist in Database");
+            throw new DataAccessException("Requested User Alias does not exist in Database");
         }
         return item;
     }
@@ -29,12 +29,12 @@ public abstract class AliasPartitionBase<T> implements AliasPartitionDAO<T> {
     @Override
     public void addItem(T item,String userAlias) throws DataAccessException {
         if(item == null){
-            throw new DataAccessException("[Bad Request] Cannot add null user");
+            throw new DataAccessException("Cannot add null user");
         } else if(userAlias == null){
-            throw new DataAccessException("[Bad Request] userAlias is null, cannot add");
+            throw new DataAccessException("userAlias is null, cannot add");
         }
         if(isInDatabase(userAlias)){
-            throw new DataAccessException("[Bad Request] user is already in database");
+            throw new DataAccessException("user alias already taken");
         }
         putItemInDB(item);
 

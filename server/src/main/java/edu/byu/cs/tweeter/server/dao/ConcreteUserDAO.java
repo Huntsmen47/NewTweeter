@@ -50,11 +50,11 @@ public class ConcreteUserDAO extends AliasPartitionBase<UserDTO> implements User
     @Override
     public void updateUser(UserDTO user) throws DataAccessException {
         if(user == null){
-            throw new DataAccessException("[Bad Request] User is null, cannot update");
+            throw new DataAccessException("User is null, cannot update");
         } else if (user.getUserAlias() == null) {
-            throw new DataAccessException("[Bad Request] User has nullAlias, cannot update");
+            throw new DataAccessException("User has nullAlias, cannot update");
         } else if (!isInDatabase(user.getUserAlias())) {
-            throw new DataAccessException("[Bad Request] User not in database, can't update");
+            throw new DataAccessException("User not in database, can't update");
         }
 
         DynamoDbTable<UserDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(UserDTO.class));
@@ -75,9 +75,9 @@ public class ConcreteUserDAO extends AliasPartitionBase<UserDTO> implements User
     @Override
     public String getPassword(String userAlias) throws DataAccessException {
         if(userAlias == null){
-            throw new DataAccessException("[Bad Request] null alias, cannot get password");
+            throw new DataAccessException("null alias, cannot get password");
         }else if(!isInDatabase(userAlias)){
-            throw new DataAccessException("[Bad Request] alias not in database, cannot get user");
+            throw new DataAccessException("alias not in database, cannot get user");
         }
         UserDTO user = getItemFromDB(userAlias);
         return user.getPassword();

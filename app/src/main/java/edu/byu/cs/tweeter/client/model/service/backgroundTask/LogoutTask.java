@@ -11,6 +11,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that logs out a user (i.e., ends a session).
@@ -23,18 +24,18 @@ public class LogoutTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try{
             LogoutRequest request = new LogoutRequest(getAuthToken());
             LogoutResponse response = getServerFacade().logout(request, UserService.LOGOUT_PATH);
             if(response.isSuccess()){
-
+                return new Pair<Boolean,String>(true,"");
             }else{
-                sendFailedMessage(response.getMessage());
+                return new Pair<Boolean,String>(false,response.getMessage());
             }
         }catch (IOException | TweeterRemoteException ex){
             Log.e("LogoutTask",ex.getMessage(),ex);
-            sendExceptionMessage(ex);
+            return new Pair<Boolean,String>(false,ex.getMessage());
         }
     }
 

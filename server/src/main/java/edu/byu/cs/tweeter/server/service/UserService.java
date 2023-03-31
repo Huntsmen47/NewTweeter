@@ -59,7 +59,9 @@ public class UserService {
 
         daoFactory = createDAOFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
-        if(userDAO.isInDatabase(request.getUsername()));
+        if(!userDAO.isInDatabase(request.getUsername())){
+            return new LoginResponse("\nincorrect password");
+        }
 
         // TODO: Generates dummy data. Replace with a real implementation.
         User user = getDummyUser();
@@ -104,7 +106,8 @@ public class UserService {
                     ,authToken.datetime);
             authTokenDAO.addItem(authTokenDTO,authTokenDTO.getUserAlias());
         } catch (DataAccessException ex){
-            throw new RuntimeException(ex.getMessage());
+            System.out.println(ex.getMessage());
+            return new RegisterResponse("\n" + ex.getMessage() + "\nPlease try again");
         }
 
         return new RegisterResponse(user, authToken);
@@ -112,7 +115,7 @@ public class UserService {
 
     public UserResponse getUser(UserRequest request){
         if(request.getTargetUserAlias() == null){
-            throw new RuntimeException("[Bad Request] Missing user alias");
+            throw new RuntimeException("Missing user alias");
         }
         User user = getFakeData().findUserByAlias(request.getTargetUserAlias());
         return new UserResponse(user);

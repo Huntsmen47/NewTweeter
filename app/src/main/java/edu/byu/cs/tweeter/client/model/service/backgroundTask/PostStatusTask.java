@@ -15,6 +15,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that posts a new status sent by a user.
@@ -37,18 +38,18 @@ public class PostStatusTask extends AuthenticatedTask {
 
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try {
         PostStatusRequest request = new PostStatusRequest(getAuthToken(),status);
         PostStatusResponse response =  getServerFacade().postStatus(request, StatusService.POST_STATUS_PATH);
         if (response.isSuccess()) {
-
+            return new Pair<Boolean,String>(true,"");
         } else {
-            sendFailedMessage(response.getMessage());
+            return new Pair<Boolean,String>(false,response.getMessage());
         }
     } catch (IOException | TweeterRemoteException ex) {
         Log.e("PostStatusTask", ex.getMessage(), ex);
-        sendExceptionMessage(ex);
+            return new Pair<Boolean,String>(false, ex.getMessage());
     }
     }
 
