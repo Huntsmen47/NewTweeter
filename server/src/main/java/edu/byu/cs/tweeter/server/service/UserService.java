@@ -42,14 +42,13 @@ public class UserService {
     }
 
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, DAOFactory daoFactory) {
         if(request.getUsername() == null){
             throw new RuntimeException("[Bad Request] Missing a username");
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[Bad Request] Missing a password");
         }
 
-        daoFactory = createDAOFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
         AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
         if(!userDAO.isInDatabase(request.getUsername())){
@@ -78,7 +77,7 @@ public class UserService {
         return new LoginResponse(user, authToken);
     }
 
-    public RegisterResponse register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request, DAOFactory daoFactory) {
         if (request.getUsername() == null) {
             throw new RuntimeException("[Bad Request] Missing username attribute");
         }
@@ -95,8 +94,6 @@ public class UserService {
             throw new RuntimeException("[Bad Request] Missing image attribute");
         }
 
-
-        daoFactory = createDAOFactory();
         UserDAO userDAO = daoFactory.makeUserDao();
         ImageDAO imageDAO = daoFactory.makeImageDao();
         AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
@@ -129,10 +126,10 @@ public class UserService {
         return new UserResponse(user);
     }
 
-    public LogoutResponse logout(LogoutRequest request){
+    public LogoutResponse logout(LogoutRequest request,DAOFactory daoFactory){
 
         try {
-            AuthTokenDAO authTokenDAO = createDAOFactory().makeAuthTokenDao();
+            AuthTokenDAO authTokenDAO = daoFactory.makeAuthTokenDao();
             authTokenDAO.deleteItem(request.getAuthToken().token);
         }catch (DataAccessException ex){
             System.out.println(ex.getMessage());
@@ -142,25 +139,9 @@ public class UserService {
         return new LogoutResponse();
     }
 
-    /**
-     * Returns the dummy user to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy user.
-     *
-     * @return a dummy user.
-     */
-    User getDummyUser() {
-        return getFakeData().getFirstUser();
-    }
 
-    /**
-     * Returns the dummy auth token to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy auth token.
-     *
-     * @return a dummy auth token.
-     */
-    AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
-    }
+
+
 
     /**
      * Returns the {@link FakeData} object used to generate dummy users and auth tokens.
@@ -207,11 +188,5 @@ public class UserService {
         return "FAILED TO HASH";
     }
 
-    private DAOFactory createDAOFactory(){
-        if(daoFactory == null){
-            // is this a bad dependency vvv
-            daoFactory = new ConcreteDaoFactory();
-        }
-        return daoFactory;
-    }
+
 }
