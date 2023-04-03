@@ -66,6 +66,11 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
 
+        long difference = System.currentTimeMillis() - request.getAuthToken().datetime;
+        if(difference > 60000){
+            throw new RuntimeException("[Bad Request] Please login");
+        }
+        request.getAuthToken().setDatetime(System.currentTimeMillis());
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         UserDAO userDAO = daoFactory.makeUserDao();
         Pair<List<FollowDTO>,Boolean> data = followDAO.getFollowers(request.getFolloweeAlias(),
