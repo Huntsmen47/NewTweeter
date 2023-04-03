@@ -11,13 +11,13 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.ConcreteFollowDAO;
 
 public class FollowServiceTest {
 
     private FollowingRequest request;
     private FollowingResponse expectedResponse;
-    private FollowDAO mockFollowDAO;
+    private ConcreteFollowDAO mockFollowDAO;
     private FollowService followServiceSpy;
 
     @BeforeEach
@@ -38,7 +38,7 @@ public class FollowServiceTest {
 
         // Setup a mock FollowDAO that will return known responses
         expectedResponse = new FollowingResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
-        mockFollowDAO = Mockito.mock(FollowDAO.class);
+        mockFollowDAO = Mockito.mock(ConcreteFollowDAO.class);
         Mockito.when(mockFollowDAO.getFollowees(request)).thenReturn(expectedResponse);
 
         followServiceSpy = Mockito.spy(FollowService.class);
@@ -47,7 +47,7 @@ public class FollowServiceTest {
 
     /**
      * Verify that the {@link FollowService#getFollowees(FollowingRequest)}
-     * method returns the same result as the {@link FollowDAO} class.
+     * method returns the same result as the {@link ConcreteFollowDAO} class.
      */
     @Test
     public void testGetFollowees_validRequest_correctResponse() {

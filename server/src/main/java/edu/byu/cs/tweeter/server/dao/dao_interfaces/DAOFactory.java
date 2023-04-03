@@ -7,4 +7,6 @@ public interface DAOFactory {
     ImageDAO makeImageDao();
 
     AuthTokenDAO makeAuthTokenDao();
+
+    FollowDAO makeFollowDAO();
 }

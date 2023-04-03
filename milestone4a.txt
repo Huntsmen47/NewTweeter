@@ -39,11 +39,23 @@ dynamo DB?
 	  an client with more robut capabilities according to AWS 
 	  documentation.
 
-What do I need to do to meet password requirements?
 
 What are the requirements the authtoken?
 	- the design of the authtoken table is up to me, my table should
 	  have "authtoken", "userAlias", "timeStamp"
 
+What is the difference between status and feed?
+- Story is all the statues posted by the target user, feed is all the
+  statuses posted by the target user's followers
 
-permanently delete
+Does feed and story table need to be sorted by most recent at the top to 
+oldest on the bottom?
+- I am going to assume that they do.
+
+What should be returned from the database when paginating followers and
+followees? 
+- a list of users
+
+What to do next?
+	Look at sample code and rewrite getFollowing function that you are
+	already using in followDAO
