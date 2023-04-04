@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.model.net.response;
 import java.util.List;
 import java.util.Objects;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 
 public class GetStoryResponse extends PagedResponse{
@@ -15,8 +16,8 @@ public class GetStoryResponse extends PagedResponse{
         super(false, message,false);
     }
 
-    public GetStoryResponse(List<Status> story,boolean hasMorePages) {
-        super(true, hasMorePages);
+    public GetStoryResponse(List<Status> story, boolean hasMorePages, AuthToken authToken) {
+        super(true, hasMorePages,authToken);
         this.story = story;
     }
 

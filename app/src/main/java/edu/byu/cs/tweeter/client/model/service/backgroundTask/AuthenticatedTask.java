@@ -20,4 +20,8 @@ public abstract class AuthenticatedTask extends BackgroundTask {
     public AuthToken getAuthToken() {
         return authToken;
     }
+
+    public void setAuthToken(AuthToken authToken){
+        this.authToken = authToken;
+    }
 }

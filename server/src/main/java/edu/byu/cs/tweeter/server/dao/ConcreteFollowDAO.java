@@ -5,11 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FollowDTO;
@@ -242,8 +240,8 @@ public class ConcreteFollowDAO implements FollowDAO {
                 hasMorePages = followeesIndex < allFollowees.size();
             }
         }
-
-        return new FollowingResponse(responseFollowees, hasMorePages);
+                                                                        // dummy token
+        return new FollowingResponse(responseFollowees, hasMorePages,new AuthToken());
     }
 
 

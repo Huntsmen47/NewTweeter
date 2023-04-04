@@ -10,16 +10,23 @@ public class UserDTO {
 
     private String password;
 
+    private int followerCount;
+
+    private int followeeCount;
+
     public UserDTO(){
 
     }
 
-    public UserDTO(String firstName, String lastName, String userAlias, String imageUrl, String password) {
+    public UserDTO(String firstName, String lastName, String userAlias,
+                   String imageUrl, String password, int followerCount,int followeeCount) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.userAlias = userAlias;
         this.imageUrl = imageUrl;
         this.password = password;
+        this.followerCount = followerCount;
+        this.followeeCount = followeeCount;
     }
 
     public String getFirstName() {
@@ -61,5 +68,21 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
+    }
+
+    public int getFolloweeCount() {
+        return followeeCount;
+    }
+
+    public void setFolloweeCount(int followeeCount) {
+        this.followeeCount = followeeCount;
     }
 }

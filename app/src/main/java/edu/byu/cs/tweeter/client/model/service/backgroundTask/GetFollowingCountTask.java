@@ -25,8 +25,8 @@ public class GetFollowingCountTask extends CountTask {
 
 
     @Override
-    public CountResponse getResponse() throws IOException, TweeterRemoteException {
-        FollowingCountRequest request = new FollowingCountRequest(getAuthToken(),"@CurrentUser");
+    public CountResponse getResponse(String targetUser) throws IOException, TweeterRemoteException {
+        FollowingCountRequest request = new FollowingCountRequest(getAuthToken(),targetUser);
         return getServerFacade().getFollowingCount(request, FollowService.FOLLOWING_COUNT_PATH);
     }
 }

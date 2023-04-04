@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.model.net.response;
 import java.util.List;
 import java.util.Objects;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 
 public class FeedResponse extends PagedResponse{
@@ -12,8 +13,8 @@ public class FeedResponse extends PagedResponse{
         super(false, message, false);
     }
 
-    public FeedResponse(boolean hasMorePages, List<Status> feed) {
-        super(true, hasMorePages);
+    public FeedResponse(boolean hasMorePages, List<Status> feed, AuthToken authToken) {
+        super(true, hasMorePages,authToken);
         this.feed = feed;
     }
 

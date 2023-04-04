@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.server.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.GetStoryRequest;
@@ -32,7 +33,8 @@ public class StatusDAO {
             }
         }
 
-        return new GetStoryResponse(responseStatuses, hasMorePages);
+            AuthToken authToken =  authenticate(request.getAuthToken());
+        return new GetStoryResponse(responseStatuses, hasMorePages,authToken);
 
     }
 
@@ -83,7 +85,16 @@ public class StatusDAO {
                 hasMorePages = statusIndex < allStatus.size();
             }
         }
+                                                                // dummy token here
+        return new FeedResponse(hasMorePages, responseStatuses,new AuthToken());
+    }
 
-        return new FeedResponse(hasMorePages, responseStatuses);
+    private AuthToken authenticate(AuthToken authToken){
+        long difference = System.currentTimeMillis() - authToken.datetime;
+        if(difference > 60000){
+            throw new RuntimeException("[Bad Request] Please login");
+        }
+        authToken.setDatetime(System.currentTimeMillis());
+        return authToken;
     }
 }

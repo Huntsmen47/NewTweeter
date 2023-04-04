@@ -30,15 +30,16 @@ public abstract class CountTask extends AuthenticatedTask{
         this.targetUser = targetUser;
     }
 
-    public abstract CountResponse getResponse() throws IOException, TweeterRemoteException;
+    public abstract CountResponse getResponse(String targetUser) throws IOException, TweeterRemoteException;
 
 
     @Override
     protected Pair processTask() {
         try {
-            CountResponse response = getResponse();
+            CountResponse response = getResponse(targetUser.getAlias());
             if(response.isSuccess()){
                 count = response.getCount();
+                setAuthToken(response.getAuthToken());
                 return new Pair<Boolean,String>(true,"");
             }else{
                 return new Pair<Boolean,String>(false,response.getMessage());

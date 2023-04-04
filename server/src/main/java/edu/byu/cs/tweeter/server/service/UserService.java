@@ -102,7 +102,7 @@ public class UserService {
 
         UserDTO userDTO = new UserDTO(request.getFirstName(),request.getLastName(),
                 request.getUsername(), imageDAO.uploadImage(request.getImage(),request.getUsername()),
-                hashedPassword);
+                hashedPassword,0,0);
         User user = convertUserDTO(userDTO);
         AuthToken authToken = new AuthToken(generateNewToken(),System.currentTimeMillis());
         try{

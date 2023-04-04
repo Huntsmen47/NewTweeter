@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.server.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
@@ -30,6 +31,8 @@ import edu.byu.cs.tweeter.util.Pair;
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService {
+
+    private Integer followerCount;
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in
@@ -66,11 +69,7 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
 
-        long difference = System.currentTimeMillis() - request.getAuthToken().datetime;
-        if(difference > 60000){
-            throw new RuntimeException("[Bad Request] Please login");
-        }
-        request.getAuthToken().setDatetime(System.currentTimeMillis());
+        AuthToken updatedAuthtoken = authenticate(request.getAuthToken());
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         UserDAO userDAO = daoFactory.makeUserDao();
         Pair<List<FollowDTO>,Boolean> data = followDAO.getFollowers(request.getFolloweeAlias(),
@@ -89,7 +88,7 @@ public class FollowService {
             System.out.println(user.getFirstName());
             followers.add(user);
         }
-        return new FollowersResponse(followers,data.getSecond());
+        return new FollowersResponse(followers,data.getSecond(),updatedAuthtoken);
     }
 
 
@@ -110,19 +109,35 @@ public class FollowService {
         return new FollowResponse();
     }
 
-    public CountResponse getFollowerCount(FollowerCountRequest request){
+    public CountResponse getFollowerCount(FollowerCountRequest request, DAOFactory daoFactory){
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("[Bad Request] Missing target user alias attribute");
         }
 
-        return new CountResponse(20);
+
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        UserDAO userDAO = daoFactory.makeUserDao();
+        UserDTO userDTO = null;
+        try {
+            System.out.println(request.getTargetUserAlias());
+             userDTO = userDAO.getItem(request.getTargetUserAlias());
+        } catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException("[Bad Request] something went wrong with FollowerCount");
+        }
+
+
+        return new CountResponse(userDTO.getFollowerCount(),updatedAuthToken);
     }
 
     public CountResponse getFollowingCount(FollowingCountRequest request){
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("[Bad Request] Missing target user alias attribute");
         }
-        return new CountResponse(20);
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+
+
+        return new CountResponse(20,updatedAuthToken);
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request){
@@ -159,5 +174,14 @@ public class FollowService {
         User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
                 userDTO.getUserAlias(),userDTO.getImageUrl());
         return user;
+    }
+
+    private AuthToken authenticate(AuthToken authToken){
+        long difference = System.currentTimeMillis() - authToken.datetime;
+        if(difference > 60000){
+            throw new RuntimeException("[Bad Request] Please login");
+        }
+        authToken.setDatetime(System.currentTimeMillis());
+        return authToken;
     }
 }
