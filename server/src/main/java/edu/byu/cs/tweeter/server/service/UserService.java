@@ -15,7 +15,6 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
-import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.AuthTokenDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
@@ -118,12 +117,21 @@ public class UserService {
         return new RegisterResponse(user, authToken);
     }
 
-    public UserResponse getUser(UserRequest request){
+    public UserResponse getUser(UserRequest request, DAOFactory daoFactory){
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("Missing user alias");
         }
-        User user = getFakeData().findUserByAlias(request.getTargetUserAlias());
-        return new UserResponse(user);
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        UserDAO userDAO = daoFactory.makeUserDao();
+        UserDTO userDTO = null;
+        try{
+            userDTO = userDAO.getItem(request.getTargetUserAlias());
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException("There is a problem with getting user's profile");
+        }
+
+        return new UserResponse(convertUserDTO(userDTO),updatedAuthToken);
     }
 
     public LogoutResponse logout(LogoutRequest request,DAOFactory daoFactory){
@@ -134,6 +142,7 @@ public class UserService {
         }catch (DataAccessException ex){
             System.out.println(ex.getMessage());
             System.out.println("Problem with deleting authtoken on logout");
+            throw new RuntimeException(ex.getMessage());
         }
 
         return new LogoutResponse();
@@ -186,6 +195,15 @@ public class UserService {
             e.printStackTrace();
         }
         return "FAILED TO HASH";
+    }
+
+    private AuthToken authenticate(AuthToken authToken){
+        long difference = System.currentTimeMillis() - authToken.datetime;
+        if(difference > 60000){
+            throw new RuntimeException("[Bad Request] Please login");
+        }
+        authToken.setDatetime(System.currentTimeMillis());
+        return authToken;
     }
 
 

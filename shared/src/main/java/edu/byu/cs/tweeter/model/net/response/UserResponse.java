@@ -7,16 +7,27 @@ public class UserResponse extends Response{
 
     private User user;
 
+    private AuthToken authToken;
+
     public UserResponse(String message) {
         super(false, message);
     }
 
-    public UserResponse(User user) {
+    public UserResponse(User user,AuthToken authToken) {
         super(true, null);
         this.user = user;
+        this.authToken = authToken;
     }
 
     public User getUser() {
         return user;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 }
