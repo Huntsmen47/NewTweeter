@@ -68,8 +68,9 @@ public class FollowService {
         }else if(request.getLimit() <= 0){
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-
+        System.out.println(request.getAuthToken().datetime);
         AuthToken updatedAuthtoken = authenticate(request.getAuthToken());
+        System.out.println(updatedAuthtoken.datetime);
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         UserDAO userDAO = daoFactory.makeUserDao();
         Pair<List<FollowDTO>,Boolean> data = followDAO.getFollowers(request.getFolloweeAlias(),
@@ -113,8 +114,6 @@ public class FollowService {
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("[Bad Request] Missing target user alias attribute");
         }
-
-
         AuthToken updatedAuthToken = authenticate(request.getAuthToken());
         UserDAO userDAO = daoFactory.makeUserDao();
         UserDTO userDTO = null;

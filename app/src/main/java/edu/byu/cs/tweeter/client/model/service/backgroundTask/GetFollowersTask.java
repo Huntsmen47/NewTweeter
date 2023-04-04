@@ -38,7 +38,7 @@ public class GetFollowersTask extends PagedTask<User> {
         try{
             FollowersResponse response = getServerFacade().getFollowers(request, FollowService.GET_FOLLOWERS_PATH);
             if(response.isSuccess()){
-                setAuthToken(response.getAuthToken());
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getFollowers(),response.getHasMorePages());
             }else{
                 sendFailedMessage(response.getMessage());

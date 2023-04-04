@@ -39,7 +39,7 @@ public abstract class CountTask extends AuthenticatedTask{
             CountResponse response = getResponse(targetUser.getAlias());
             if(response.isSuccess()){
                 count = response.getCount();
-                setAuthToken(response.getAuthToken());
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<Boolean,String>(true,"");
             }else{
                 return new Pair<Boolean,String>(false,response.getMessage());

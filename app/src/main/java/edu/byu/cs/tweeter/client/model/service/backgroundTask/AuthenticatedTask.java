@@ -24,4 +24,8 @@ public abstract class AuthenticatedTask extends BackgroundTask {
     public void setAuthToken(AuthToken authToken){
         this.authToken = authToken;
     }
+
+    public void setDateTime(long dateTime){
+        authToken.setDatetime(dateTime);
+    }
 }
