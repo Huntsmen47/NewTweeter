@@ -209,39 +209,19 @@ public class ConcreteFollowDAO implements FollowDAO {
         return null;
     }
 
-    /**
-     * Gets the users from the database that the user specified in the request is following. Uses
-     * information in the request object to limit the number of followees returned and to return the
-     * next set of followees after any that were returned in a previous request. The current
-     * implementation returns generated data and doesn't actually access a database.
-     *
-     * @param request contains information about the user whose followees are to be returned and any
-     *                other information required to satisfy the request.
-     * @return the followees.
-     */
-    public FollowingResponse getFollowees(FollowingRequest request) {
+
+    @Override
+    public Pair<List<FollowDTO>,Boolean> getFollowees(String targetUserAlias, int pageSize, String lastUserAlias) {
         // TODO: Generates dummy data. Replace with a real implementation.
-        assert request.getLimit() > 0;
-        assert request.getFollowerAlias() != null;
+        assert pageSize>0;
+        assert targetUserAlias != null;
 
-        List<User> allFollowees = getDummyFollowees();
-        List<User> responseFollowees = new ArrayList<>(request.getLimit());
+        DataPage<FollowDTO> followPage = getPageOfFollowees(targetUserAlias,pageSize,lastUserAlias);
+        List<FollowDTO> followers = followPage.getValues();
 
-        boolean hasMorePages = false;
+        boolean hasMorePages = followPage.isHasMorePages();
 
-        if(request.getLimit() > 0) {
-            if (allFollowees != null) {
-                int followeesIndex = getFolloweesStartingIndex(request.getLastFolloweeAlias(), allFollowees);
-
-                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
-                    responseFollowees.add(allFollowees.get(followeesIndex));
-                }
-
-                hasMorePages = followeesIndex < allFollowees.size();
-            }
-        }
-                                                                        // dummy token
-        return new FollowingResponse(responseFollowees, hasMorePages,new AuthToken());
+        return new Pair<>(followers,hasMorePages);
     }
 
 

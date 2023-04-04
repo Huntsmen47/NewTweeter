@@ -46,6 +46,7 @@ public class GetFollowingTask extends PagedTask<User> {
         try{
             FollowingResponse response = getServerFacade().getFollowees(request, FollowService.GET_FOLLOWING_PATH);
             if(response.isSuccess()){
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getFollowees(),response.getHasMorePages());
             }else{
                 sendFailedMessage(response.getMessage());
