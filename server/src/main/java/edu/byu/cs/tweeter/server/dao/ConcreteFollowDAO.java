@@ -120,7 +120,7 @@ public class ConcreteFollowDAO implements FollowDAO {
                 .queryConditional(QueryConditional.keyEqualTo(key))
                 .limit(pageSize);
 
-
+        System.out.println("paging size of following:"+ pageSize);
         if(isNonEmptyString(lastUserAlias)) {
             // Build up the Exclusive Start Key (telling DynamoDB where you left off reading items)
             Map<String, AttributeValue> startKey = new HashMap<>();

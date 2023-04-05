@@ -122,12 +122,7 @@ public class FollowService {
 
 
     public FollowResponse follow(FollowRequest request, DAOFactory daoFactory) {
-        String debugMessage = "Follow";
-        String debug1 = String.format("FolloweeAlias: %s",request.getFolloweeAlias());
-        String debug2 = String.format("FollowerAlias: %s",request.getFollowerAlias());
-        System.out.println(debugMessage);
-        System.out.println(debug1);
-        System.out.println(debug2);
+
         if (request.getFolloweeAlias() == null) {
             throw new RuntimeException("[Bad Request] Missing followee user alias attribute");
         }
@@ -194,13 +189,8 @@ public class FollowService {
         return new CountResponse(userDTO.getFolloweeCount(),updatedAuthToken);
     }
 
-    public UnfollowResponse unfollow(UnfollowRequest request){
-        String debugMessage = "Unfollow";
-        String debug1 = String.format("FolloweeAlias: %s",request.getFolloweeAlias());
-        String debug2 = String.format("FollowerAlias: %s",request.getFollowerAlias());
-        System.out.println(debugMessage);
-        System.out.println(debug1);
-        System.out.println(debug2);
+    public UnfollowResponse unfollow(UnfollowRequest request, DAOFactory daoFactory){
+
         if (request.getFolloweeAlias() == null){
             throw new RuntimeException("[Bad Request] Missing followee user alias");
         }
@@ -208,6 +198,25 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Missing follower user alias");
         }
         AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+
+        UserDAO userDAO = daoFactory.makeUserDao();
+        FollowDAO followDAO = daoFactory.makeFollowDAO();
+        try {
+            UserDTO follower = userDAO.getItem(request.getFollowerAlias());
+            UserDTO followee = userDAO.getItem(request.getFolloweeAlias());
+            FollowDTO followDTO = followDAO.getFollow(request.getFollowerAlias(),request.getFolloweeAlias());
+            followDAO.delete(followDTO);
+            if(followDTO == null){
+                throw new RuntimeException("[Bad Request] failed to unfollow");
+            }
+            follower.setFolloweeCount(follower.getFolloweeCount()-1);
+            followee.setFollowerCount(followee.getFollowerCount()-1);
+            userDAO.updateUser(follower);
+            userDAO.updateUser(followee);
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException("there is a problem with unfollowing");
+        }
 
         return new UnfollowResponse(updatedAuthToken);
     }
