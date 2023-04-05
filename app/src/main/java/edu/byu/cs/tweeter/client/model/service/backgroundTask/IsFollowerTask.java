@@ -32,7 +32,7 @@ public class IsFollowerTask extends AuthenticatedTask {
      */
     private User followee;
 
-    private boolean isFollower = new Random().nextInt() > 0;
+    private boolean isFollower;
 
 
     public IsFollowerTask(AuthToken authToken, User follower, User followee, Handler messageHandler) {
@@ -48,6 +48,8 @@ public class IsFollowerTask extends AuthenticatedTask {
             IsFollowerRequest request = new IsFollowerRequest(follower.getAlias(),followee.getAlias(),getAuthToken());
             IsFollowerResponse response =  getServerFacade().isFollower(request, FollowService.IS_FOLLOWER_PATH);
             if (response.isSuccess()) {
+                setDateTime(response.getAuthToken().datetime);
+                isFollower = response.getIsFollowFlag();
                 return new Pair<Boolean,String>(true,"");
             } else {
                 return new Pair<Boolean,String>(false,response.getMessage());

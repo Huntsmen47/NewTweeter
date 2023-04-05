@@ -18,7 +18,7 @@ public class IsFollowerResponse extends Response{
         this.authToken = authToken;
     }
 
-    public boolean isFollowFlag() {
+    public boolean getIsFollowFlag() {
         return isFollowFlag;
     }
 
@@ -29,4 +29,5 @@ public class IsFollowerResponse extends Response{
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
     }
+
 }
