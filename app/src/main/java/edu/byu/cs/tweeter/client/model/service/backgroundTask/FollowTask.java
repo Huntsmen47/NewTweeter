@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -36,14 +37,15 @@ public class FollowTask extends AuthenticatedTask {
     @Override
     protected Pair processTask() {
         try {
-            FollowRequest followRequest = new FollowRequest(followee.getAlias(),"currentUser",getAuthToken());
+            FollowRequest followRequest = new FollowRequest(followee.getAlias(),
+                    Cache.getInstance().getCurrUser().getAlias(),getAuthToken());
             FollowResponse response =  getServerFacade().follow(followRequest, UserService.FOLLOW_PATH);
             if (response.isSuccess()) {
                 return new Pair<Boolean,String>(true,"");
             } else {
                 return new Pair<Boolean,String>(false,response.getMessage());
             }
-        } catch (IOException | TweeterRemoteException ex) {
+        } catch (Exception ex) {
             Log.e("FollowTask", ex.getMessage(), ex);
             return new Pair<Boolean,String>(false,ex.getMessage());
         }

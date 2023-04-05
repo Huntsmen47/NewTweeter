@@ -32,8 +32,6 @@ import edu.byu.cs.tweeter.util.Pair;
  */
 public class FollowService {
 
-    private Integer followerCount;
-
     /**
      * Returns the users that the user specified in the request is following. Uses information in
      * the request object to limit the number of followees returned and to return the next set of
@@ -74,14 +72,21 @@ public class FollowService {
 
     }
 
-    public IsFollowerResponse isFollower(IsFollowerRequest request){
+    public IsFollowerResponse isFollower(IsFollowerRequest request, DAOFactory daoFactory){
         if(request.getAllegedFollowerAlias() == null){
             throw new RuntimeException("[Bad Request] Request needs to have an alleged Follower");
         }else if(request.getAllegedFolloweeAlias()==null){
             throw new RuntimeException("[Bad Request] Request needs to have an alleged followee");
         }
+        AuthToken updatedAuthtoken = authenticate(request.getAuthToken());
+        FollowDAO followDAO = daoFactory.makeFollowDAO();
+        FollowDTO followDTO = followDAO.getFollow(request.getAllegedFollowerAlias(),
+                request.getAllegedFolloweeAlias());
+        if(followDTO == null){
+            return new IsFollowerResponse(false,updatedAuthtoken);
+        }
 
-        return new IsFollowerResponse(true);
+        return new IsFollowerResponse(true,updatedAuthtoken);
     }
 
     public FollowersResponse getFollowers(FollowersRequest request, DAOFactory daoFactory){
@@ -114,7 +119,7 @@ public class FollowService {
     }
 
 
-    public FollowResponse follow(FollowRequest request) {
+    public FollowResponse follow(FollowRequest request, DAOFactory daoFactory) {
         String debugMessage = "Follow";
         String debug1 = String.format("FolloweeAlias: %s",request.getFolloweeAlias());
         String debug2 = String.format("FollowerAlias: %s",request.getFollowerAlias());
@@ -125,10 +130,28 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Missing followee user alias attribute");
         }
         if (request.getFollowerAlias() == null) {
-          //  throw new RuntimeException("[Bad Request] Missing follower user alias attribute");
+            throw new RuntimeException("[Bad Request] Missing follower user alias attribute");
+        }
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        UserDAO userDAO = daoFactory.makeUserDao();
+        FollowDAO followDAO = daoFactory.makeFollowDAO();
+        try {
+            UserDTO follower = userDAO.getItem(request.getFollowerAlias());
+            UserDTO followee = userDAO.getItem(request.getFolloweeAlias());
+            followDAO.putFollow(request.getFollowerAlias(),follower.getFirstName(),
+                    request.getFolloweeAlias(),followee.getFirstName());
+            follower.setFolloweeCount(follower.getFolloweeCount()+1);
+            followee.setFollowerCount(followee.getFollowerCount()+1);
+            userDAO.updateUser(follower);
+            userDAO.updateUser(followee);
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException("there is a problem with following");
         }
 
-        return new FollowResponse();
+
+
+        return new FollowResponse(updatedAuthToken);
     }
 
     public CountResponse getFollowerCount(FollowerCountRequest request, DAOFactory daoFactory){
@@ -181,8 +204,9 @@ public class FollowService {
         if(request.getFollowerAlias() == null){
             throw new RuntimeException("[Bad Request] Missing follower user alias");
         }
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
 
-        return new UnfollowResponse();
+        return new UnfollowResponse(updatedAuthToken);
     }
 
 

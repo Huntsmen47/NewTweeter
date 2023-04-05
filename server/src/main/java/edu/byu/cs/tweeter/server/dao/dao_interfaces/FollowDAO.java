@@ -28,7 +28,6 @@ public interface FollowDAO {
 
     // this will help implement unfollow
     public void delete(FollowDTO follow);
-    DataPage<FollowDTO> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias);
 
     Pair<List<FollowDTO>,Boolean> getFollowers(String targetUserAlias, int pageSize, String lastUserAlias);
 

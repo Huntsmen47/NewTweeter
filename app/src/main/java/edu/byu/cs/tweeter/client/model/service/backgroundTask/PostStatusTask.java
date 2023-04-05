@@ -47,7 +47,7 @@ public class PostStatusTask extends AuthenticatedTask {
         } else {
             return new Pair<Boolean,String>(false,response.getMessage());
         }
-    } catch (IOException | TweeterRemoteException ex) {
+    } catch (Exception ex) {
         Log.e("PostStatusTask", ex.getMessage(), ex);
             return new Pair<Boolean,String>(false, ex.getMessage());
     }

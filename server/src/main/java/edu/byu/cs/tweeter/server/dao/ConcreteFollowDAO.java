@@ -110,8 +110,7 @@ public class ConcreteFollowDAO implements FollowDAO {
         table.deleteItem(key);
     }
 
-    @Override
-    public DataPage<FollowDTO> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias){
+    private DataPage<FollowDTO> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias){
         DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)

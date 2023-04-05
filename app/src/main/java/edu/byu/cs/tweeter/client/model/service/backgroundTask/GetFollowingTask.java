@@ -51,7 +51,7 @@ public class GetFollowingTask extends PagedTask<User> {
             }else{
                 sendFailedMessage(response.getMessage());
             }
-        }catch(IOException | TweeterRemoteException ex){
+        }catch(Exception ex){
             Log.e("Get Following Task,","Get Following Task Failed",ex);
             sendExceptionMessage(ex);
         }

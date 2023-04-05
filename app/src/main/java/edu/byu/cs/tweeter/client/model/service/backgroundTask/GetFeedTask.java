@@ -46,7 +46,7 @@ public class GetFeedTask extends PagedTask<Status> {
             }else{
                 sendFailedMessage(response.getMessage());
             }
-        }catch (IOException | TweeterRemoteException ex){
+        }catch (Exception ex){
             Log.e("Get Feed Task,","Get Feed Task Failed",ex);
             sendExceptionMessage(ex);
         }

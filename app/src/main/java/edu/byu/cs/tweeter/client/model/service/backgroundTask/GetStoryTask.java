@@ -43,7 +43,7 @@ public class GetStoryTask extends PagedTask<Status> {
             }else{
                 sendFailedMessage(response.getMessage());
             }
-        }catch (IOException| TweeterRemoteException ex){
+        }catch (Exception ex){
             Log.e("Get Story Task,","Get Story Task Failed",ex);
             sendExceptionMessage(ex);
         }

@@ -49,7 +49,7 @@ public class GetUserTask extends AuthenticatedTask {
              }else{
                  return new Pair<Boolean,String>(false,response.getMessage());
              }
-         }catch (IOException | TweeterRemoteException ex){
+         }catch (Exception ex){
              Log.e("UserTask",ex.getMessage(),ex);
              return new Pair<Boolean,String>(false, ex.getMessage());
          }

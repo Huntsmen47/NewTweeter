@@ -22,7 +22,6 @@ import edu.byu.cs.tweeter.server.dao.dao_interfaces.ImageDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.AuthTokenDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
-import edu.byu.cs.tweeter.util.FakeData;
 
 
 
@@ -146,24 +145,6 @@ public class UserService {
         }
 
         return new LogoutResponse();
-    }
-
-
-
-
-
-    /**
-     * Returns the {@link FakeData} object used to generate dummy users and auth tokens.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
-
-    boolean validatePassword(String userAlias,String password){
-        return true;
     }
 
     /**
