@@ -43,6 +43,7 @@ public class PostStatusTask extends AuthenticatedTask {
         PostStatusRequest request = new PostStatusRequest(getAuthToken(),status);
         PostStatusResponse response =  getServerFacade().postStatus(request, StatusService.POST_STATUS_PATH);
         if (response.isSuccess()) {
+            setDateTime(response.getAuthToken().datetime);
             return new Pair<Boolean,String>(true,"");
         } else {
             return new Pair<Boolean,String>(false,response.getMessage());

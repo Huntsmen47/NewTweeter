@@ -40,12 +40,8 @@ public class ConcreteFollowDAO implements FollowDAO {
     private static final String FolloweeHandleAttr = "followee_handle";
 
 
-    private static DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
-            .region(Region.US_EAST_1)
-            .build();
-    private static DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-            .dynamoDbClient(dynamoDbClient)
-            .build();
+    private static DynamoDbClient dynamoDbClient;
+    private static DynamoDbEnhancedClient enhancedClient;
 
     private static boolean isNonEmptyString(String value){
         return (value != null && value.length()>0);
@@ -54,7 +50,7 @@ public class ConcreteFollowDAO implements FollowDAO {
     @Override
     public void putFollow(String follower_handle, String followerName,
                           String followee_handle, String followeeName){
-        DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowDTO.class));
+        DynamoDbTable<FollowDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(follower_handle).sortValue(followee_handle)
                 .build();
@@ -76,7 +72,7 @@ public class ConcreteFollowDAO implements FollowDAO {
 
     @Override
     public FollowDTO getFollow(String follower_handle, String followee_handle){
-        DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName,TableSchema.fromBean(FollowDTO.class));
+        DynamoDbTable<FollowDTO> table = getEnhancedClient().table(TableName,TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(follower_handle).sortValue(followee_handle)
                 .build();
@@ -86,7 +82,7 @@ public class ConcreteFollowDAO implements FollowDAO {
 
     @Override
     public boolean update(FollowDTO follow){
-        DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName,TableSchema.fromBean(FollowDTO.class));
+        DynamoDbTable<FollowDTO> table = getEnhancedClient().table(TableName,TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(follow.getFollower_handle()).sortValue(follow.getFollowee_handle())
                 .build();
@@ -103,7 +99,7 @@ public class ConcreteFollowDAO implements FollowDAO {
 
     @Override
     public void delete(FollowDTO follow){
-        DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName,TableSchema.fromBean(FollowDTO.class));
+        DynamoDbTable<FollowDTO> table = getEnhancedClient().table(TableName,TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(follow.getFollower_handle()).sortValue(follow.getFollowee_handle())
                 .build();
@@ -111,7 +107,7 @@ public class ConcreteFollowDAO implements FollowDAO {
     }
 
     private DataPage<FollowDTO> getPageOfFollowees(String targetUserAlias, int pageSize, String lastUserAlias){
-        DynamoDbTable<FollowDTO> table = enhancedClient.table(TableName, TableSchema.fromBean(FollowDTO.class));
+        DynamoDbTable<FollowDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(FollowDTO.class));
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)
                 .build();
@@ -150,7 +146,7 @@ public class ConcreteFollowDAO implements FollowDAO {
 
 
     public DataPage<FollowDTO> getPageOfFollowers(String targetUserAlias, int pageSize, String lastUserAlias){
-        DynamoDbIndex<FollowDTO> index = enhancedClient.table(TableName, TableSchema.fromBean(FollowDTO.class)).index(IndexName);
+        DynamoDbIndex<FollowDTO> index = getEnhancedClient().table(TableName, TableSchema.fromBean(FollowDTO.class)).index(IndexName);
         Key key = Key.builder()
                 .partitionValue(targetUserAlias)
                 .build();
@@ -186,29 +182,6 @@ public class ConcreteFollowDAO implements FollowDAO {
     }
 
 
-
-
-
-    /**
-     * Gets the count of users from the database that the user specified is following. The
-     * current implementation uses generated data and doesn't actually access a database.
-     *
-     * @param follower the User whose count of how many following is desired.
-     * @return said count.
-     */
-    @Override
-    public Integer getFolloweeCount(User follower) {
-        // TODO: uses the dummy data.  Replace with a real implementation.
-        assert follower != null;
-        return getDummyFollowees().size();
-    }
-
-    @Override
-    public Integer getFollowerCount(User followee) {
-        return null;
-    }
-
-
     @Override
     public Pair<List<FollowDTO>,Boolean> getFollowees(String targetUserAlias, int pageSize, String lastUserAlias) {
         // TODO: Generates dummy data. Replace with a real implementation.
@@ -237,71 +210,23 @@ public class ConcreteFollowDAO implements FollowDAO {
         return new Pair<>(followers,hasMorePages);
     }
 
-    /**
-     * Determines the index for the first followee in the specified 'allFollowees' list that should
-     * be returned in the current request. This will be the index of the next followee after the
-     * specified 'lastFollowee'.
-     *
-     * @param lastFolloweeAlias the alias of the last followee that was returned in the previous
-     *                          request or null if there was no previous request.
-     * @param allFollowees the generated list of followees from which we are returning paged results.
-     * @return the index of the first followee to be returned.
-     */
-    private int getFolloweesStartingIndex(String lastFolloweeAlias, List<User> allFollowees) {
-
-        int followeesIndex = 0;
-
-        if(lastFolloweeAlias != null) {
-            // This is a paged request for something after the first page. Find the first item
-            // we should return
-            for (int i = 0; i < allFollowees.size(); i++) {
-                if(lastFolloweeAlias.equals(allFollowees.get(i).getAlias())) {
-                    // We found the index of the last item returned last time. Increment to get
-                    // to the first one we should return
-                    followeesIndex = i + 1;
-                    break;
-                }
-            }
+    protected DynamoDbClient getDynamoDbClient(){
+        if(dynamoDbClient == null){
+            dynamoDbClient = DynamoDbClient.builder()
+                    .region(Region.US_EAST_1)
+                    .build();
         }
 
-        return followeesIndex;
+        return dynamoDbClient;
     }
 
-
-    private int getFollowersStartingIndex(String lastFollowerAlias, List<User> allFollowers){
-        int followersIndex = 0;
-        if(lastFollowerAlias != null){
-            for (int i = 0; i < allFollowers.size(); i++) {
-                if(lastFollowerAlias.equals(allFollowers.get(i).getAlias())) {
-                    // We found the index of the last item returned last time. Increment to get
-                    // to the first one we should return
-                    followersIndex = i + 1;
-                    break;
-                }
-            }
+    protected DynamoDbEnhancedClient getEnhancedClient(){
+        if(enhancedClient == null){
+            enhancedClient = DynamoDbEnhancedClient.builder()
+                    .dynamoDbClient(getDynamoDbClient())
+                    .build();
         }
-        return followersIndex;
+        return enhancedClient;
     }
 
-    /**
-     * Returns the list of dummy followee data. This is written as a separate method to allow
-     * mocking of the followees.
-     *
-     * @return the followees.
-     */
-    List<User> getDummyFollowees() {
-        return getFakeData().getFakeUsers();
-    }
-
-    List<User> getDummyFollowers(){return getFakeData().getFakeUsers();}
-
-    /**
-     * Returns the {@link FakeData} object used to generate dummy followees.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
 }

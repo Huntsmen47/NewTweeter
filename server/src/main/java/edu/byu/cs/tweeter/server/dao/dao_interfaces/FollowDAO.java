@@ -33,8 +33,4 @@ public interface FollowDAO {
 
     Pair<List<FollowDTO>,Boolean> getFollowees(String targetUserAlias, int pageSize, String lastUserAlias);
 
-    Integer getFolloweeCount(User follower);
-
-    Integer getFollowerCount(User followee);
-
 }

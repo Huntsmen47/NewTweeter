@@ -42,6 +42,7 @@ public class GetFeedTask extends PagedTask<Status> {
         try {
             FeedResponse response = getServerFacade().getFeed(request, StatusService.GET_FEED_PATH);
             if(response.isSuccess()){
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getFeed(),response.getHasMorePages());
             }else{
                 sendFailedMessage(response.getMessage());

@@ -9,4 +9,8 @@ public interface DAOFactory {
     AuthTokenDAO makeAuthTokenDao();
 
     FollowDAO makeFollowDAO();
+
+    StoryDAO makeStoryDAO();
+
+    FeedDAO makeFeedDAO();
 }

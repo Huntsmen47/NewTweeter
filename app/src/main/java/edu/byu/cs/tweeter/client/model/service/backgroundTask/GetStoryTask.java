@@ -38,7 +38,7 @@ public class GetStoryTask extends PagedTask<Status> {
         try {
             GetStoryResponse response = getServerFacade().getStory(request, StatusService.GET_STORY_PATH);
             if(response.isSuccess()){
-                setAuthToken(response.getAuthToken());
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getStory(),response.getHasMorePages());
             }else{
                 sendFailedMessage(response.getMessage());
