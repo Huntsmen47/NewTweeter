@@ -22,17 +22,22 @@ public class BaseService {
         try{
             AuthTokenDTO authTokenDTO = authTokenDAO.getItem(authToken.token);
             authToken.setDatetime(authTokenDTO.datetime);
+            long difference = System.currentTimeMillis() - authToken.datetime;
+
+            if(difference > 60000){
+                throw new RuntimeException("[Bad Request] Please login");
+            }
+            authTokenDTO.setDatetime(System.currentTimeMillis());
+            System.out.println("About to update token");
+            System.out.println("UserAlias that is getting queried "+ authTokenDTO.getUserAlias());
+            authTokenDAO.update(authTokenDTO);
+            System.out.println("Token updated");
+            authToken.setDatetime(authTokenDTO.datetime);
         }catch (DataAccessException ex){
             System.out.println(ex.getMessage());
             throw new RuntimeException("Problem with authToken");
         }
-        long difference = System.currentTimeMillis() - authToken.datetime;
 
-        if(difference > 60000){
-            throw new RuntimeException("[Bad Request] Please login");
-        }
-
-        authToken.setDatetime(System.currentTimeMillis());
         return authToken;
     }
 }

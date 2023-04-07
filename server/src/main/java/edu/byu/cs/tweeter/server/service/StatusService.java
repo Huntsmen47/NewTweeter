@@ -39,6 +39,9 @@ public class StatusService extends BaseService {
         UserDAO userDAO = daoFactory.makeUserDao();
         try {
             UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
+            if(userDTO.getFollowerCount() == 0){
+                return new PostStatusResponse(authToken);
+            }
             System.out.println("This is the alias we are getting the followers for:"
                     +storyDTO.getUserAlias());
             List<FollowDTO> followDTOList = followDAO.getFollowers(storyDTO.getUserAlias(),
