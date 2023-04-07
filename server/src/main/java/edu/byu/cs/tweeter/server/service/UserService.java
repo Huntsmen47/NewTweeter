@@ -118,7 +118,7 @@ public class UserService extends BaseService {
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("Missing user alias");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         UserDAO userDAO = daoFactory.makeUserDao();
         UserDTO userDTO = null;
         try{

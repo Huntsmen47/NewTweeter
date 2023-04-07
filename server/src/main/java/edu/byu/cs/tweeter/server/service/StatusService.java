@@ -30,7 +30,7 @@ public class StatusService extends BaseService {
         if(request.getStatus() == null){
             throw new RuntimeException("[Bad Request] Missing status");
         }
-        AuthToken authToken =  authenticate(request.getAuthToken());
+        AuthToken authToken =  authenticate(request.getAuthToken(),daoFactory);
         StoryDAO storyDAO = daoFactory.makeStoryDAO();
         StoryDTO storyDTO = convertStatus(request.getStatus());
         storyDAO.postStatus(storyDTO);
@@ -72,7 +72,7 @@ public class StatusService extends BaseService {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
 
-        AuthToken authToken =  authenticate(request.getAuthToken());
+        AuthToken authToken =  authenticate(request.getAuthToken(),daoFactory);
         StoryDAO storyDAO = daoFactory.makeStoryDAO();
         Pair<List<StoryDTO>,Boolean> data = storyDAO.getStory(request.getLimit(),
                 request.getTargetUserAlias(),convertStatus(request.getLastStatus()));
@@ -91,7 +91,7 @@ public class StatusService extends BaseService {
         }else if(request.getLimit() <= 0){
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
-        AuthToken authToken =  authenticate(request.getAuthToken());
+        AuthToken authToken =  authenticate(request.getAuthToken(),daoFactory);
         FeedDAO feedDAO = daoFactory.makeFeedDAO();
         Pair<List<FeedDTO>,Boolean> data = feedDAO.getFeed(request.getLimit(),
                 request.getTargetUserAlias(),convertStatusToFeedDTO(request.getLastStatus(),

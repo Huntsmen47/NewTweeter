@@ -50,7 +50,7 @@ public class FollowService extends BaseService {
         }
 
 
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         UserDAO userDAO = daoFactory.makeUserDao();
         Pair<List<FollowDTO>,Boolean> data = followDAO.getFollowees(request.getFollowerAlias(),
@@ -79,7 +79,7 @@ public class FollowService extends BaseService {
         }else if(request.getAllegedFolloweeAlias()==null){
             throw new RuntimeException("[Bad Request] Request needs to have an alleged followee");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         FollowDTO followDTO = followDAO.getFollow(request.getAllegedFollowerAlias(),
                 request.getAllegedFolloweeAlias());
@@ -98,7 +98,7 @@ public class FollowService extends BaseService {
             throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
         }
 
-                AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+                AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         UserDAO userDAO = daoFactory.makeUserDao();
         Pair<List<FollowDTO>,Boolean> data = followDAO.getFollowers(request.getFolloweeAlias(),
@@ -129,7 +129,7 @@ public class FollowService extends BaseService {
         if (request.getFollowerAlias() == null) {
             throw new RuntimeException("[Bad Request] Missing follower user alias attribute");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         UserDAO userDAO = daoFactory.makeUserDao();
         FollowDAO followDAO = daoFactory.makeFollowDAO();
         try {
@@ -155,7 +155,7 @@ public class FollowService extends BaseService {
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("[Bad Request] Missing target user alias attribute");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
         UserDAO userDAO = daoFactory.makeUserDao();
         UserDTO userDTO = null;
         try {
@@ -174,7 +174,7 @@ public class FollowService extends BaseService {
         if(request.getTargetUserAlias() == null){
             throw new RuntimeException("[Bad Request] Missing target user alias attribute");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
 
         UserDAO userDAO = daoFactory.makeUserDao();
         UserDTO userDTO = null;
@@ -197,7 +197,7 @@ public class FollowService extends BaseService {
         if(request.getFollowerAlias() == null){
             throw new RuntimeException("[Bad Request] Missing follower user alias");
         }
-        AuthToken updatedAuthToken = authenticate(request.getAuthToken());
+        AuthToken updatedAuthToken = authenticate(request.getAuthToken(),daoFactory);
 
         UserDAO userDAO = daoFactory.makeUserDao();
         FollowDAO followDAO = daoFactory.makeFollowDAO();
