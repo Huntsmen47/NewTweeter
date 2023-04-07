@@ -51,7 +51,7 @@ public class GetUserTask extends AuthenticatedTask {
              }
          }catch (Exception ex){
              Log.e("UserTask",ex.getMessage(),ex);
-             return new Pair<Boolean,String>(false, ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
          }
     }
 

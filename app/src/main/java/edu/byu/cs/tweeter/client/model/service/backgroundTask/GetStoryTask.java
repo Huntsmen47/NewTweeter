@@ -41,14 +41,13 @@ public class GetStoryTask extends PagedTask<Status> {
                 setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getStory(),response.getHasMorePages());
             }else{
-                sendFailedMessage(response.getMessage());
+                Log.e("Get Story Task,","Get Story Task Failed");
+                return new Pair<>(null,false);
             }
         }catch (Exception ex){
             Log.e("Get Story Task,","Get Story Task Failed",ex);
-            sendExceptionMessage(ex);
+            throw new RuntimeException(ex.getMessage());
         }
 
-        System.out.println("You are returning null here in GetStoryTask, something went wrong here");
-        return null;
     }
 }

@@ -47,7 +47,7 @@ public class FollowTask extends AuthenticatedTask {
             }
         } catch (Exception ex) {
             Log.e("FollowTask", ex.getMessage(), ex);
-            return new Pair<Boolean,String>(false,ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
 
     }

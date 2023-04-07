@@ -15,8 +15,11 @@ import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.FeedDAO;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
+import edu.byu.cs.tweeter.server.dao.dto.FeedDTO;
+import edu.byu.cs.tweeter.server.dao.dto.FollowDTO;
 import edu.byu.cs.tweeter.server.dao.dto.StoryDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.Pair;
@@ -49,7 +52,7 @@ public class StatusService {
         List<Status> statuses = new ArrayList<>();
 
         for(StoryDTO storyDTO:data.getFirst()){
-            statuses.add(convertStoryDTO(storyDTO,daoFactory));
+            statuses.add(convertStoryDtoToStatus(storyDTO,daoFactory));
         }
 
         return new GetStoryResponse(statuses,data.getSecond(),authToken);
@@ -63,9 +66,12 @@ public class StatusService {
         }
         AuthToken authToken =  authenticate(request.getAuthToken());
         FeedDAO feedDAO = daoFactory.makeFeedDAO();
-        Pair<List<Status>,Boolean> data = feedDAO.getFeed(request.getLimit(),
-                request.getTargetUserAlias(),request.getLastStatus());
-        return new FeedResponse(data.getSecond(),data.getFirst(),authToken);
+        Pair<List<FeedDTO>,Boolean> data = feedDAO.getFeed(request.getLimit(),
+                request.getTargetUserAlias(),convertStatusToFeedDTO(request.getLastStatus(),
+                        request.getTargetUserAlias()));
+        List<Status> feed = convertFeedDTOList(data.getFirst(),daoFactory);
+
+        return new FeedResponse(data.getSecond(),feed,authToken);
     }
 
 
@@ -78,7 +84,7 @@ public class StatusService {
         return authToken;
     }
 
-    public Status convertStoryDTO(StoryDTO storyDTO,DAOFactory daoFactory) {
+    public Status convertStoryDtoToStatus(StoryDTO storyDTO, DAOFactory daoFactory) {
         UserDAO userDAO = daoFactory.makeUserDao();
         User user = null;
         try{
@@ -108,4 +114,38 @@ public class StatusService {
                 userDTO.getUserAlias(),userDTO.getImageUrl());
         return user;
     }
+
+    public FeedDTO convertStoryDtoToFeedDto(StoryDTO storyDTO, String ownerAlias){
+        FeedDTO feedDTO = new FeedDTO(ownerAlias,storyDTO.getUserAlias(),storyDTO.getTimeStamp(),
+                storyDTO.getUrls(),storyDTO.getMentions(),storyDTO.getPost());
+        return feedDTO;
+    }
+
+    public List<Status> convertFeedDTOList(List<FeedDTO> feedDTOList,DAOFactory daoFactory){
+        UserDAO userDAO = daoFactory.makeUserDao();
+        List<Status> feed = new ArrayList<>();
+
+        for(FeedDTO feedDTO:feedDTOList){
+            try {
+                UserDTO userDTO = userDAO.getItem(feedDTO.getPostAlias());
+                Status status = new Status(feedDTO.getPost(),convertUserDTO(userDTO),
+                        feedDTO.getTimeStamp(),feedDTO.getUrls(),feedDTO.getMentions());
+                feed.add(status);
+            }catch (DataAccessException ex){
+                System.out.println(ex.getMessage());
+                throw new RuntimeException("[Bad Request] problem with feed");
+            }
+        }
+        return feed;
+    }
+
+    public FeedDTO convertStatusToFeedDTO(Status status, String ownerAlias){
+        if(status == null){
+            return null;
+        }
+        FeedDTO feedDTO = new FeedDTO(ownerAlias,status.user.getAlias(),status.timestamp,
+                status.urls,status.mentions,status.post);
+        return feedDTO;
+    }
+
 }

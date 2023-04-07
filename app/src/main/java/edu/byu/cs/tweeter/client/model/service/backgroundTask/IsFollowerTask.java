@@ -56,7 +56,7 @@ public class IsFollowerTask extends AuthenticatedTask {
             }
         } catch (Exception ex) {
             Log.e("IsFollowerTask", ex.getMessage(), ex);
-            return new Pair<Boolean,String>(false, ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
     }
 

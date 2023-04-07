@@ -43,26 +43,6 @@ public class ConcreteStoryDAO implements StoryDAO {
         assert pageLimit > 0;
         assert targetUser != null;
 
-      /* List<Status> allStatus = getDummyStatus();
-       List<Status> responseStatuses = new ArrayList<>(pageLimit);
-
-
-
-        boolean hasMorePages = false;
-
-        if(pageLimit > 0) {
-            if (allStatus != null) {
-                int statusIndex = getStatusStartingIndex(lastStatus, allStatus);
-
-                for(int limitCounter = 0; statusIndex < allStatus.size() && limitCounter <
-                        pageLimit; statusIndex++, limitCounter++) {
-                    responseStatuses.add(allStatus.get(statusIndex));
-                }
-
-                hasMorePages = statusIndex < allStatus.size();
-            }
-        }*/
-
           DataPage<StoryDTO> storyPage = getPageOfStatus(targetUser,pageLimit,lastStatus);
           List<StoryDTO> story = storyPage.getValues();
           System.out.println("Size of StoryDTO data that gets returned:" + story.size());
@@ -86,10 +66,6 @@ public class ConcreteStoryDAO implements StoryDAO {
         }else{
             table.putItem(status);
         }
-    }
-
-    private static boolean isNonEmptyString(String value){
-        return (value != null && value.length()>0);
     }
     private DataPage<StoryDTO> getPageOfStatus(String targetUserAlias, int pageSize, StoryDTO lastStatus){
         System.out.println(targetUserAlias);
@@ -141,32 +117,6 @@ public class ConcreteStoryDAO implements StoryDAO {
             return false;
         }
         return true;
-    }
-
-
-    private int getStatusStartingIndex(Status lastStatus, List<Status> allStatus) {
-        int statusIndex = 0;
-        if(lastStatus != null) {
-            // This is a paged request for something after the first page. Find the first item
-            // we should return
-            for (int i = 0; i < allStatus.size(); i++) {
-                if(lastStatus.equals(allStatus.get(i))) {
-                    // We found the index of the last item returned last time. Increment to get
-                    // to the first one we should return
-                    statusIndex = i + 1;
-                    break;
-                }
-            }
-        }
-        return statusIndex;
-    }
-
-    private List<Status> getDummyStatus() {
-        return getFakeData().getFakeStatuses();
-    }
-
-    private FakeData getFakeData() {
-        return FakeData.getInstance();
     }
 
     protected DynamoDbClient getDynamoDbClient(){

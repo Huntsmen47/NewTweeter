@@ -45,15 +45,13 @@ public class GetFeedTask extends PagedTask<Status> {
                 setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getFeed(),response.getHasMorePages());
             }else{
-                sendFailedMessage(response.getMessage());
+                Log.e("Get Feed Task","Error in get feed task");
+                return new Pair<>(null,false);
             }
         }catch (Exception ex){
             Log.e("Get Feed Task,","Get Feed Task Failed",ex);
-            sendExceptionMessage(ex);
+            throw new RuntimeException(ex.getMessage());
         }
-
-        System.out.println("You are returning null here in GetFeedTask, something went wrong here");
-        return null;
     }
 
 

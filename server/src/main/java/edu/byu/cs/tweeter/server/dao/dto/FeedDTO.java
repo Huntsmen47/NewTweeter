@@ -11,7 +11,7 @@ public class FeedDTO {
 
     private String userAlias;
 
-    private String followerAlias;
+    private String postAlias;
 
     private Long timeStamp;
 
@@ -25,9 +25,9 @@ public class FeedDTO {
 
     }
 
-    public FeedDTO(String userAlias, String followerAlias, Long timeStamp, List<String> urls, List<String> mentions, String post) {
+    public FeedDTO(String userAlias, String postAlias, Long timeStamp, List<String> urls, List<String> mentions, String post) {
         this.userAlias = userAlias;
-        this.followerAlias = followerAlias;
+        this.postAlias = postAlias;
         this.timeStamp = timeStamp;
         this.urls = urls;
         this.mentions = mentions;
@@ -43,12 +43,12 @@ public class FeedDTO {
         this.userAlias = userAlias;
     }
 
-    public String getFollowerAlias() {
-        return followerAlias;
+    public String getPostAlias() {
+        return postAlias;
     }
 
-    public void setFollowerAlias(String followerAlias) {
-        this.followerAlias = followerAlias;
+    public void setPostAlias(String postAlias) {
+        this.postAlias = postAlias;
     }
 
     @DynamoDbSortKey()
