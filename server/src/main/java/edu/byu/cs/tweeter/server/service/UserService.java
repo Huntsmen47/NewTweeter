@@ -25,9 +25,7 @@ import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 
 
 
-public class UserService {
-
-    private DAOFactory daoFactory;
+public class UserService extends BaseService {
 
 
     private static final SecureRandom secureRandom = new SecureRandom(); //threadsafe
@@ -147,21 +145,6 @@ public class UserService {
         return new LogoutResponse();
     }
 
-    /**
-     * Pre-Conditions
-     * - userDTO cannot be null
-     * - userDTO must have non null firstName, lastName, userAlias, imageUrl
-     * Post-Conditions
-     * - user returned with non null firstName, lastName, userAlias, imageUrl
-     * @param userDTO
-     * @return
-     */
-    public User convertUserDTO(UserDTO userDTO) {
-        User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
-                userDTO.getUserAlias(),userDTO.getImageUrl());
-        return user;
-    }
-
     private static String hashPassword(String passwordToHash) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -176,15 +159,6 @@ public class UserService {
             e.printStackTrace();
         }
         return "FAILED TO HASH";
-    }
-
-    private AuthToken authenticate(AuthToken authToken){
-        long difference = System.currentTimeMillis() - authToken.datetime;
-        if(difference > 60000){
-            throw new RuntimeException("[Bad Request] Please login");
-        }
-        authToken.setDatetime(System.currentTimeMillis());
-        return authToken;
     }
 
 

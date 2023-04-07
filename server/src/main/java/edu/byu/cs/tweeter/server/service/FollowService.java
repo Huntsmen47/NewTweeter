@@ -30,7 +30,7 @@ import edu.byu.cs.tweeter.util.Pair;
 /**
  * Contains the business logic for getting the users a user is following.
  */
-public class FollowService {
+public class FollowService extends BaseService {
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in
@@ -234,18 +234,5 @@ public class FollowService {
         return new ConcreteFollowDAO();
     }
 
-    public User convertUserDTO(UserDTO userDTO) {
-        User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
-                userDTO.getUserAlias(),userDTO.getImageUrl());
-        return user;
-    }
 
-    private AuthToken authenticate(AuthToken authToken){
-        long difference = System.currentTimeMillis() - authToken.datetime;
-        if(difference > 60000){
-            throw new RuntimeException("[Bad Request] Please login");
-        }
-        authToken.setDatetime(System.currentTimeMillis());
-        return authToken;
-    }
 }

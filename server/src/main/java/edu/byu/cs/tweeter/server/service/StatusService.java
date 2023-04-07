@@ -24,7 +24,7 @@ import edu.byu.cs.tweeter.server.dao.dto.StoryDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class StatusService {
+public class StatusService extends BaseService {
 
     public PostStatusResponse postStatus(PostStatusRequest request, DAOFactory daoFactory){
         if(request.getStatus() == null){
@@ -34,6 +34,33 @@ public class StatusService {
         StoryDAO storyDAO = daoFactory.makeStoryDAO();
         StoryDTO storyDTO = convertStatus(request.getStatus());
         storyDAO.postStatus(storyDTO);
+        FollowDAO followDAO = daoFactory.makeFollowDAO();
+        FeedDAO feedDAO = daoFactory.makeFeedDAO();
+        UserDAO userDAO = daoFactory.makeUserDao();
+        try {
+            UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
+            System.out.println("This is the alias we are getting the followers for:"
+                    +storyDTO.getUserAlias());
+            List<FollowDTO> followDTOList = followDAO.getFollowers(storyDTO.getUserAlias(),
+                    10,null).getFirst();
+            System.out.println(userDTO.getFirstName() +"s followersize: "+followDTOList.size());
+            System.out.println("followerHandle:"+followDTOList.get(0).getFollower_handle());
+            System.out.println("followeeHandle:"+followDTOList.get(0).getFollowee_handle());
+            List<FeedDTO> feedDTOList = new ArrayList<>();
+            for(FollowDTO followDTO:followDTOList){
+                FeedDTO feedDTO = convertStoryDtoToFeedDto(storyDTO,followDTO.getFollower_handle());
+                feedDTOList.add(feedDTO);
+            }
+            for(FeedDTO ele:feedDTOList){
+                feedDAO.addStatus(ele);
+            }
+
+        }catch (DataAccessException ex){
+            System.out.println(ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
+
+
 
         return new PostStatusResponse(authToken);
     }
@@ -74,16 +101,6 @@ public class StatusService {
         return new FeedResponse(data.getSecond(),feed,authToken);
     }
 
-
-    private AuthToken authenticate(AuthToken authToken){
-        long difference = System.currentTimeMillis() - authToken.datetime;
-        if(difference > 60000){
-            throw new RuntimeException("[Bad Request] Please login");
-        }
-        authToken.setDatetime(System.currentTimeMillis());
-        return authToken;
-    }
-
     public Status convertStoryDtoToStatus(StoryDTO storyDTO, DAOFactory daoFactory) {
         UserDAO userDAO = daoFactory.makeUserDao();
         User user = null;
@@ -107,12 +124,6 @@ public class StatusService {
         StoryDTO storyDTO = new StoryDTO(status.user.getAlias(),
                 status.timestamp,status.urls,status.mentions,status.post);
         return  storyDTO;
-    }
-
-    public User convertUserDTO(UserDTO userDTO) {
-        User user = new User(userDTO.getFirstName(),userDTO.getLastName(),
-                userDTO.getUserAlias(),userDTO.getImageUrl());
-        return user;
     }
 
     public FeedDTO convertStoryDtoToFeedDto(StoryDTO storyDTO, String ownerAlias){

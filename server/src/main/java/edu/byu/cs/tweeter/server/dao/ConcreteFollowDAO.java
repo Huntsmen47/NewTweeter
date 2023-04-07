@@ -30,7 +30,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class ConcreteFollowDAO implements FollowDAO {
+public class ConcreteFollowDAO extends BaseDAO implements FollowDAO {
 
 
     private static final String TableName = "Follows";
@@ -38,10 +38,6 @@ public class ConcreteFollowDAO implements FollowDAO {
 
     private static final String FollowerHandleAttr = "follower_handle";
     private static final String FolloweeHandleAttr = "followee_handle";
-
-
-    private static DynamoDbClient dynamoDbClient;
-    private static DynamoDbEnhancedClient enhancedClient;
 
     private static boolean isNonEmptyString(String value){
         return (value != null && value.length()>0);
@@ -155,6 +151,7 @@ public class ConcreteFollowDAO implements FollowDAO {
                 .queryConditional(QueryConditional.keyEqualTo(key))
                 .limit(pageSize);
 
+        System.out.println("Made request builder and key");
         if(isNonEmptyString(lastUserAlias)) {
             // Build up the Exclusive Start Key (telling DynamoDB where you left off reading items)
             Map<String, AttributeValue> startKey = new HashMap<>();
@@ -164,8 +161,9 @@ public class ConcreteFollowDAO implements FollowDAO {
             requestBuilder.exclusiveStartKey(startKey);
         }
 
-        QueryEnhancedRequest request = requestBuilder.build();
 
+        QueryEnhancedRequest request = requestBuilder.build();
+        System.out.println("built request");
         DataPage<FollowDTO> result = new DataPage<FollowDTO>();
 
         SdkIterable<Page<FollowDTO>> sdkIterable = index.query(request);
@@ -177,6 +175,7 @@ public class ConcreteFollowDAO implements FollowDAO {
                     page.items().forEach(follow -> result.getValues().add(follow));
                 });
 
+        System.out.println("about to return result");
         return result;
 
     }
@@ -202,7 +201,9 @@ public class ConcreteFollowDAO implements FollowDAO {
         assert pageSize>0;
         assert targetUserAlias != null;
 
+        System.out.println("About to get follow page");
         DataPage<FollowDTO> followPage = getPageOfFollowers(targetUserAlias,pageSize,lastUserAlias);
+        System.out.println("got follow page");
         List<FollowDTO> followers = followPage.getValues();
 
         boolean hasMorePages = followPage.isHasMorePages();
@@ -210,23 +211,5 @@ public class ConcreteFollowDAO implements FollowDAO {
         return new Pair<>(followers,hasMorePages);
     }
 
-    protected DynamoDbClient getDynamoDbClient(){
-        if(dynamoDbClient == null){
-            dynamoDbClient = DynamoDbClient.builder()
-                    .region(Region.US_EAST_1)
-                    .build();
-        }
-
-        return dynamoDbClient;
-    }
-
-    protected DynamoDbEnhancedClient getEnhancedClient(){
-        if(enhancedClient == null){
-            enhancedClient = DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(getDynamoDbClient())
-                    .build();
-        }
-        return enhancedClient;
-    }
 
 }

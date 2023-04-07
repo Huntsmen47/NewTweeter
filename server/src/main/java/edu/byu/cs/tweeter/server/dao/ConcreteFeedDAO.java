@@ -23,21 +23,18 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-public class ConcreteFeedDAO implements FeedDAO {
+public class ConcreteFeedDAO extends PagingDAO<FeedDTO> implements FeedDAO {
 
     private static final String TableName = "Feed";
 
     private static final String UserAliasAttr = "userAlias";
     private static final String TimeStampAttr = "timeStamp";
-
-    private static DynamoDbClient dynamoDbClient;
-    private static DynamoDbEnhancedClient enhancedClient;
 @Override
     public Pair<List<FeedDTO>, Boolean> getFeed(int pageLimit, String targetUser, FeedDTO lastStatus) {
         assert pageLimit > 0;
         assert targetUser != null;
 
-        DataPage<FeedDTO> feedPage = getPageOfStatus(targetUser,pageLimit,lastStatus);
+        DataPage<FeedDTO> feedPage = getPageOfItem(targetUser,pageLimit,lastStatus);
         List<FeedDTO> story = feedPage.getValues();
         System.out.println("Size of feedDTO data that gets returned:" + story.size());
         boolean hasMorePages = feedPage.isHasMorePages();
@@ -53,7 +50,7 @@ public class ConcreteFeedDAO implements FeedDAO {
         Key key = Key.builder()
                 .partitionValue(feedDTO.getUserAlias()).sortValue(feedDTO.getTimeStamp())
                 .build();
-
+        System.out.println("Built key using "+feedDTO.getUserAlias()+" and "+feedDTO.getTimeStamp());
         FeedDTO status = table.getItem(key);
         if(status != null){
             table.updateItem(feedDTO);
@@ -64,60 +61,20 @@ public class ConcreteFeedDAO implements FeedDAO {
     }
 
 
+    @Override
+    protected DynamoDbTable<FeedDTO> getTable() {
+        return getEnhancedClient().table(TableName, TableSchema.fromBean(FeedDTO.class));
+    }
 
-    private DataPage<FeedDTO> getPageOfStatus(String targetUserAlias, int pageSize, FeedDTO lastStatus){
-        System.out.println(targetUserAlias);
-        System.out.println(pageSize);
-
-        DynamoDbTable<FeedDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(FeedDTO.class));
-        Key key = Key.builder()
-                .partitionValue(targetUserAlias)
-                .build();
-
-        QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
-                .queryConditional(QueryConditional.keyEqualTo(key))
-                .limit(pageSize).scanIndexForward(false);
-
-        System.out.println("paging size of Feed:"+ pageSize);
-        if(lastStatus != null) {
+    @Override
+    protected void checkForPaging(FeedDTO lastItem, String targetUserAlias, QueryEnhancedRequest.Builder requestBuilder) {
+        if(lastItem != null) {
             // Build up the Exclusive Start Key (telling DynamoDB where you left off reading items)
             Map<String, AttributeValue> startKey = new HashMap<>();
             startKey.put(UserAliasAttr, AttributeValue.builder().s(targetUserAlias).build());
-            startKey.put(TimeStampAttr, AttributeValue.builder().s(Long.toString(lastStatus.getTimeStamp())).build());
+            startKey.put(TimeStampAttr, AttributeValue.builder().s(Long.toString(lastItem.getTimeStamp())).build());
 
             requestBuilder.exclusiveStartKey(startKey);
         }
-
-        QueryEnhancedRequest request = requestBuilder.build();
-
-        DataPage<FeedDTO> result = new DataPage<FeedDTO>();
-
-        PageIterable<FeedDTO> pages = table.query(request);
-        pages.stream()
-                .limit(1)
-                .forEach((Page<FeedDTO> page) -> {
-                    result.setHasMorePages(page.lastEvaluatedKey() != null);
-                    page.items().forEach(status -> result.getValues().add(status));
-                });
-        return result;
-    }
-
-    protected DynamoDbClient getDynamoDbClient(){
-        if(dynamoDbClient == null){
-            dynamoDbClient = DynamoDbClient.builder()
-                    .region(Region.US_EAST_1)
-                    .build();
-        }
-
-        return dynamoDbClient;
-    }
-
-    protected DynamoDbEnhancedClient getEnhancedClient(){
-        if(enhancedClient == null){
-            enhancedClient = DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(getDynamoDbClient())
-                    .build();
-        }
-        return enhancedClient;
     }
 }

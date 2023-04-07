@@ -5,10 +5,8 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-public abstract class StringPartitionBase<T> implements StringPartitionDAO<T> {
+public abstract class StringPartitionBase<T> extends BaseDAO implements StringPartitionDAO<T> {
 
-    private static DynamoDbClient dynamoDbClient;
-    private static DynamoDbEnhancedClient enhancedClient;
 
     @Override
     public T getItem(String userAlias) throws DataAccessException{
@@ -56,25 +54,6 @@ public abstract class StringPartitionBase<T> implements StringPartitionDAO<T> {
 
         removeItemFromDB(userAlias);
 
-    }
-
-    protected DynamoDbClient getDynamoDbClient(){
-        if(dynamoDbClient == null){
-            dynamoDbClient = DynamoDbClient.builder()
-                    .region(Region.US_EAST_1)
-                    .build();
-        }
-
-        return dynamoDbClient;
-    }
-
-    protected DynamoDbEnhancedClient getEnhancedClient(){
-        if(enhancedClient == null){
-            enhancedClient = DynamoDbEnhancedClient.builder()
-                    .dynamoDbClient(getDynamoDbClient())
-                    .build();
-        }
-        return enhancedClient;
     }
 
     @Override
