@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.response.CountResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class CountTask extends AuthenticatedTask{
 
@@ -29,21 +30,23 @@ public abstract class CountTask extends AuthenticatedTask{
         this.targetUser = targetUser;
     }
 
-    public abstract CountResponse getResponse() throws IOException, TweeterRemoteException;
+    public abstract CountResponse getResponse(String targetUser) throws IOException, TweeterRemoteException;
 
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try {
-            CountResponse response = getResponse();
+            CountResponse response = getResponse(targetUser.getAlias());
             if(response.isSuccess()){
                 count = response.getCount();
+                setDateTime(response.getAuthToken().datetime);
+                return new Pair<Boolean,String>(true,"");
             }else{
-                sendFailedMessage(response.getMessage());
+                return new Pair<Boolean,String>(false,response.getMessage());
             }
-        }catch (IOException|TweeterRemoteException ex){
+        }catch (Exception ex){
             Log.e("CountTask",ex.getMessage(),ex);
-            sendExceptionMessage(ex);
+            return new Pair<Boolean,String>(false,ex.getMessage());
         }
 
     }

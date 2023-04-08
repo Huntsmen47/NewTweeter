@@ -53,10 +53,14 @@ public abstract class PagedTask<T> extends AuthenticatedTask{
         return lastItem;
     }
    @Override
-    protected void processTask() {
+    protected Pair processTask() {
         Pair<List<T>, Boolean> pageOfItems = getItems();
+        if(pageOfItems.getFirst() == null){
+            return new Pair<Boolean,String>(false,"There was an error with paging");
+        }
         items = pageOfItems.getFirst();
         hasMorePages = pageOfItems.getSecond();
+        return new Pair<Boolean,String>(true,"");
     }
 
     protected abstract Pair<List<T>, Boolean>  getItems();

@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
+import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that determines if one user is following another.
@@ -31,7 +32,7 @@ public class IsFollowerTask extends AuthenticatedTask {
      */
     private User followee;
 
-    private boolean isFollower = new Random().nextInt() > 0;
+    private boolean isFollower;
 
 
     public IsFollowerTask(AuthToken authToken, User follower, User followee, Handler messageHandler) {
@@ -42,18 +43,20 @@ public class IsFollowerTask extends AuthenticatedTask {
 
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try {
             IsFollowerRequest request = new IsFollowerRequest(follower.getAlias(),followee.getAlias(),getAuthToken());
             IsFollowerResponse response =  getServerFacade().isFollower(request, FollowService.IS_FOLLOWER_PATH);
             if (response.isSuccess()) {
-
+                setDateTime(response.getAuthToken().datetime);
+                isFollower = response.getIsFollowFlag();
+                return new Pair<Boolean,String>(true,"");
             } else {
-                sendFailedMessage(response.getMessage());
+                return new Pair<Boolean,String>(false,response.getMessage());
             }
-        } catch (IOException | TweeterRemoteException ex) {
+        } catch (Exception ex) {
             Log.e("IsFollowerTask", ex.getMessage(), ex);
-            sendExceptionMessage(ex);
+            throw new RuntimeException(ex.getMessage());
         }
     }
 

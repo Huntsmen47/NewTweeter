@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.server.dao.ConcreteDaoFactory;
+import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
 import edu.byu.cs.tweeter.server.service.FollowService;
 
 /**
@@ -26,6 +28,7 @@ public class GetFollowingHandler implements RequestHandler<FollowingRequest, Fol
     public FollowingResponse handleRequest(FollowingRequest request, Context context) {
         System.out.println("Handling request in GetFollowing Handler");
         FollowService service = new FollowService();
-        return service.getFollowees(request);
+        DAOFactory daoFactory = new ConcreteDaoFactory();
+        return service.getFollowees(request,daoFactory);
     }
 }

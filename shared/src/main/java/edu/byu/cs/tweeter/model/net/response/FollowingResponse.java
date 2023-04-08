@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.model.net.response;
 import java.util.List;
 import java.util.Objects;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 
@@ -29,8 +30,8 @@ public class FollowingResponse extends PagedResponse {
      * @param followees the followees to be included in the result.
      * @param hasMorePages an indicator of whether more data is available for the request.
      */
-    public FollowingResponse(List<User> followees, boolean hasMorePages) {
-        super(true, hasMorePages);
+    public FollowingResponse(List<User> followees, boolean hasMorePages, AuthToken authToken) {
+        super(true, hasMorePages,authToken);
         this.followees = followees;
     }
 

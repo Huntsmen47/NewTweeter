@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.model.net.response;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+
 /**
  * A response that can indicate whether there is more data available from the server.
  */
@@ -7,14 +9,18 @@ public class PagedResponse extends Response {
 
     private final boolean hasMorePages;
 
-    PagedResponse(boolean success, boolean hasMorePages) {
+    private AuthToken authToken;
+
+    PagedResponse(boolean success, boolean hasMorePages,AuthToken authToken) {
         super(success);
         this.hasMorePages = hasMorePages;
+        this.authToken = authToken;
     }
 
     PagedResponse(boolean success, String message, boolean hasMorePages) {
         super(success, message);
         this.hasMorePages = hasMorePages;
+
     }
 
     /**
@@ -26,5 +32,9 @@ public class PagedResponse extends Response {
      */
     public boolean getHasMorePages() {
         return hasMorePages;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
     }
 }

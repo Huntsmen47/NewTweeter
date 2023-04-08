@@ -13,6 +13,8 @@ public class FollowRequest {
 
     public FollowRequest(String followeeAlias, String followerAlias, AuthToken authToken) {
         this.followeeAlias = followeeAlias;
+        this.followerAlias = followerAlias;
+        this.authToken = authToken;
     }
 
     public String getFolloweeAlias() {

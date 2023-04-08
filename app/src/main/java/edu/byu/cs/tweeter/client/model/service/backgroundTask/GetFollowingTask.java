@@ -46,16 +46,16 @@ public class GetFollowingTask extends PagedTask<User> {
         try{
             FollowingResponse response = getServerFacade().getFollowees(request, FollowService.GET_FOLLOWING_PATH);
             if(response.isSuccess()){
+                setDateTime(response.getAuthToken().datetime);
                 return new Pair<>(response.getFollowees(),response.getHasMorePages());
             }else{
-                sendFailedMessage(response.getMessage());
+                Log.e("Get Following Task,","Get Following Task Failed");
+                return new Pair<>(null,false);
             }
-        }catch(IOException | TweeterRemoteException ex){
+        }catch(Exception ex){
             Log.e("Get Following Task,","Get Following Task Failed",ex);
-            sendExceptionMessage(ex);
+            throw new RuntimeException(ex.getMessage());
         }
 
-        System.out.println("You are returning null here in GetFollowingTask, something went wrong here");
-        return null;
     }
 }

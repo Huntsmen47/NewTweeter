@@ -3,18 +3,21 @@ package edu.byu.cs.tweeter.model.net.response;
 import java.util.List;
 import java.util.Objects;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowersResponse extends PagedResponse{
 
     private List<User> followers;
 
+
+
     public FollowersResponse(String message) {
         super(false, message, false);
     }
 
-    public FollowersResponse(List<User> followers,boolean hasMorePages) {
-        super(true, hasMorePages);
+    public FollowersResponse(List<User> followers,boolean hasMorePages,AuthToken authToken) {
+        super(true, hasMorePages,authToken);
         this.followers = followers;
     }
 
@@ -43,4 +46,6 @@ public class FollowersResponse extends PagedResponse{
     public List<User> getFollowers() {
         return followers;
     }
+
+
 }

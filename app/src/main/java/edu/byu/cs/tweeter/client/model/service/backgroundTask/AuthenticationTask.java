@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.client.model.service.UserService;
@@ -52,18 +53,19 @@ public abstract class AuthenticationTask extends BackgroundTask {
     }
 
     @Override
-    protected void processTask() {
+    protected Pair processTask() {
         try {
             AuthenticationResponse response =  doAuthentication();
             if (response.isSuccess()) {
                 setAuthenticatedUser(response.getUser());
                 setAuthToken(response.getAuthToken());
+                return new Pair<Boolean,String>(true,"");
             } else {
-                sendFailedMessage(response.getMessage());
+                return new Pair<Boolean,String>(false,response.getMessage());
             }
-        } catch (IOException |TweeterRemoteException ex) {
+        } catch (Exception ex) {
             Log.e("AuthenticationTask", ex.getMessage(), ex);
-            sendExceptionMessage(ex);
+            return new Pair<Boolean,String>(false,ex.getMessage());
         }
     }
 
