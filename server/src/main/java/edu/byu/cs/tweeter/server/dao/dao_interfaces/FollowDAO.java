@@ -33,4 +33,5 @@ public interface FollowDAO {
 
     Pair<List<FollowDTO>,Boolean> getFollowees(String targetUserAlias, int pageSize, String lastUserAlias);
 
+    void addFollowBatch(List<FollowDTO> follows);
 }

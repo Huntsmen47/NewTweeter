@@ -24,7 +24,7 @@ public class BaseService {
             authToken.setDatetime(authTokenDTO.datetime);
             long difference = System.currentTimeMillis() - authToken.datetime;
 
-            if(difference > 60000){
+            if(difference > 3600000){
                 throw new RuntimeException("[Bad Request] Please login");
             }
             authTokenDTO.setDatetime(System.currentTimeMillis());

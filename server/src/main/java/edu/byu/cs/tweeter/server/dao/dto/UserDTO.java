@@ -1,4 +1,5 @@
 package edu.byu.cs.tweeter.server.dao.dto;
+import edu.byu.cs.tweeter.model.domain.User;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 @DynamoDbBean
@@ -16,6 +17,13 @@ public class UserDTO {
 
     public UserDTO(){
 
+    }
+
+    public UserDTO(User user){
+        this.userAlias = user.getAlias();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.imageUrl = user.getImageUrl();
     }
 
     public UserDTO(String firstName, String lastName, String userAlias,

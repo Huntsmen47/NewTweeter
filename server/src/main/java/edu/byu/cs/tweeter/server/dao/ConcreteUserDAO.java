@@ -1,10 +1,17 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class ConcreteUserDAO extends StringPartitionBase<UserDTO> implements UserDAO {
 
@@ -81,6 +88,53 @@ public class ConcreteUserDAO extends StringPartitionBase<UserDTO> implements Use
         }
         UserDTO user = getItemFromDB(userAlias);
         return user.getPassword();
+    }
+
+    @Override
+    public void addUserBatch(List<UserDTO> users) {
+        List<UserDTO> batchToWrite = new ArrayList<>();
+        for (UserDTO u : users) {
+            batchToWrite.add(u);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfUserDTOs(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfUserDTOs(batchToWrite);
+        }
+
+    }
+
+    private void writeChunkOfUserDTOs(List<UserDTO> userDTOs) {
+        if(userDTOs.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<UserDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(UserDTO.class));
+        WriteBatch.Builder<UserDTO> writeBuilder = WriteBatch.builder(UserDTO.class).mappedTableResource(table);
+        for (UserDTO item : userDTOs) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = getEnhancedClient().batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfUserDTOs(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
     }
 
 

@@ -27,6 +27,11 @@ dependencies {
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.977'
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.977'
+
 
 
 

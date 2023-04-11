@@ -1,7 +1,9 @@
 package edu.byu.cs.tweeter.server.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -15,14 +17,20 @@ import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.server.dao.DataAccessException;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.FeedDAO;
-import edu.byu.cs.tweeter.server.dao.dao_interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.UserDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FeedDTO;
-import edu.byu.cs.tweeter.server.dao.dto.FollowDTO;
 import edu.byu.cs.tweeter.server.dao.dto.StoryDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.Pair;
+
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
+
+
 
 public class StatusService extends BaseService {
 
@@ -34,34 +42,49 @@ public class StatusService extends BaseService {
         StoryDAO storyDAO = daoFactory.makeStoryDAO();
         StoryDTO storyDTO = convertStatus(request.getStatus());
         storyDAO.postStatus(storyDTO);
-        FollowDAO followDAO = daoFactory.makeFollowDAO();
-        FeedDAO feedDAO = daoFactory.makeFeedDAO();
-        UserDAO userDAO = daoFactory.makeUserDao();
-        try {
-            UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
-            if(userDTO.getFollowerCount() == 0){
-                return new PostStatusResponse(authToken);
-            }
-            System.out.println("This is the alias we are getting the followers for:"
-                    +storyDTO.getUserAlias());
-            List<FollowDTO> followDTOList = followDAO.getFollowers(storyDTO.getUserAlias(),
-                    10,null).getFirst();
-            System.out.println(userDTO.getFirstName() +"s followersize: "+followDTOList.size());
-            System.out.println("followerHandle:"+followDTOList.get(0).getFollower_handle());
-            System.out.println("followeeHandle:"+followDTOList.get(0).getFollowee_handle());
-            List<FeedDTO> feedDTOList = new ArrayList<>();
-            for(FollowDTO followDTO:followDTOList){
-                FeedDTO feedDTO = convertStoryDtoToFeedDto(storyDTO,followDTO.getFollower_handle());
-                feedDTOList.add(feedDTO);
-            }
-            for(FeedDTO ele:feedDTOList){
-                feedDAO.addStatus(ele);
-            }
+        String queueUrl = "https://sqs.us-east-1.amazonaws.com/240336757899/PostStatusQueue";
+        Map<String,MessageAttributeValue> data = new HashMap<>();
+        data.put("userAlias",new MessageAttributeValue().withDataType("String").withStringValue(storyDTO.getUserAlias()));
+        data.put("post",new MessageAttributeValue().withDataType("String").withStringValue(storyDTO.getPost()));
+        data.put("timeStamp",new MessageAttributeValue().withDataType("Number").withStringValue(Long.toString(storyDTO.getTimeStamp())));
 
-        }catch (DataAccessException ex){
-            System.out.println(ex.getMessage());
-            throw new RuntimeException(ex.getMessage());
-        }
+        SendMessageRequest sendMessageRequest = new SendMessageRequest()
+                .withQueueUrl(queueUrl)
+                .withMessageBody("post")
+                .withMessageAttributes(data);
+        AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+        SendMessageResult sendMessageResult = sqs.sendMessage(sendMessageRequest);
+        String msgId = sendMessageResult.getMessageId();
+        System.out.println("Message ID: " + msgId);
+
+//        FollowDAO followDAO = daoFactory.makeFollowDAO();
+//        FeedDAO feedDAO = daoFactory.makeFeedDAO();
+//        UserDAO userDAO = daoFactory.makeUserDao();
+//        try {
+//            UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
+//            if(userDTO.getFollowerCount() == 0){
+//                return new PostStatusResponse(authToken);
+//            }
+//            System.out.println("This is the alias we are getting the followers for:"
+//                    +storyDTO.getUserAlias());
+//            List<FollowDTO> followDTOList = followDAO.getFollowers(storyDTO.getUserAlias(),
+//                    10,null).getFirst();
+//            System.out.println(userDTO.getFirstName() +"s followersize: "+followDTOList.size());
+//            System.out.println("followerHandle:"+followDTOList.get(0).getFollower_handle());
+//            System.out.println("followeeHandle:"+followDTOList.get(0).getFollowee_handle());
+//            List<FeedDTO> feedDTOList = new ArrayList<>();
+//            for(FollowDTO followDTO:followDTOList){
+//                FeedDTO feedDTO = convertStoryDtoToFeedDto(storyDTO,followDTO.getFollower_handle());
+//                feedDTOList.add(feedDTO);
+//            }
+//            for(FeedDTO ele:feedDTOList){
+//                feedDAO.addStatus(ele);
+//            }
+//
+//        }catch (DataAccessException ex){
+//            System.out.println(ex.getMessage());
+//            throw new RuntimeException(ex.getMessage());
+//        }
 
 
 
