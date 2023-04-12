@@ -36,16 +36,21 @@ public class PostUpdateQueue implements RequestHandler<SQSEvent,Void>{
             StoryDTO storyDTO = getGson().fromJson(msg.getBody(),StoryDTO.class);
             FollowDAO followDAO = getDaoFactory().makeFollowDAO();
             Pair<List<FollowDTO>,Boolean> followData = followDAO.getFollowers(storyDTO.getUserAlias(),100,null);
+            if(!followData.getSecond()){
+                createAndSendMessage(followData,storyDTO,followDAO,queueUrl);
+                return null;
+            }
             while (followData.getSecond()){
                 List<FeedDTO> feedDTOList = new ArrayList<>();
+                int size = followData.getFirst().size();
                 for(FollowDTO follow:followData.getFirst()){
                     FeedDTO feedDTO = new FeedDTO(follow.getFollower_handle(),
-                            follow.getFollowee_handle(),null,storyDTO.getUrls(),
+                            follow.getFollowee_handle(),storyDTO.getTimeStamp(),storyDTO.getUrls(),
                             storyDTO.getMentions(),storyDTO.getPost());
                     feedDTOList.add(feedDTO);
                 }
                 followData = followDAO.getFollowers(storyDTO.getUserAlias(),100,
-                        followData.getFirst().get(99).getFollower_handle());
+                        followData.getFirst().get(size-1).getFollower_handle());
 
                 String feedJson = getGson().toJson(feedDTOList);
                 SendMessageRequest sendMessageRequest = new SendMessageRequest()
@@ -59,6 +64,24 @@ public class PostUpdateQueue implements RequestHandler<SQSEvent,Void>{
         }
 
         return null;
+    }
+
+    private void createAndSendMessage(Pair<List<FollowDTO>,Boolean> followData,StoryDTO storyDTO,FollowDAO followDAO,String queueUrl){
+        List<FeedDTO> feedDTOList = new ArrayList<>();
+        for(FollowDTO follow:followData.getFirst()){
+            FeedDTO feedDTO = new FeedDTO(follow.getFollower_handle(),
+                    follow.getFollowee_handle(),storyDTO.getTimeStamp(),storyDTO.getUrls(),
+                    storyDTO.getMentions(),storyDTO.getPost());
+            feedDTOList.add(feedDTO);
+        }
+
+        String feedJson = getGson().toJson(feedDTOList);
+        SendMessageRequest sendMessageRequest = new SendMessageRequest()
+                .withQueueUrl(queueUrl)
+                .withMessageBody(feedJson);
+        SendMessageResult sendMessageResult = getSQSClient().sendMessage(sendMessageRequest);
+        String msgId = sendMessageResult.getMessageId();
+        System.out.println("Message ID: " + msgId);
     }
 
     private DAOFactory getDaoFactory(){

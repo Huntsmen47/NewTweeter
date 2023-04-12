@@ -13,6 +13,8 @@ public interface FeedDAO {
 
     void addStatus(FeedDTO feedDTO);
 
+    void addFeedBatch(List<FeedDTO> feedDTOList);
+
 
 
 }

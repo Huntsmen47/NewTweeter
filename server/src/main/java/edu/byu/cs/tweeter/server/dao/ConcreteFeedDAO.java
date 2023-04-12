@@ -5,27 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.server.dao.dao_interfaces.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.dto.FeedDTO;
-import edu.byu.cs.tweeter.server.dao.dto.FollowDTO;
-import edu.byu.cs.tweeter.server.dao.dto.StoryDTO;
-import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
-import edu.byu.cs.tweeter.util.FakeData;
 import edu.byu.cs.tweeter.util.Pair;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.Page;
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 public class ConcreteFeedDAO extends PagingDAO<FeedDTO> implements FeedDAO {
 
@@ -61,6 +52,54 @@ public class ConcreteFeedDAO extends PagingDAO<FeedDTO> implements FeedDAO {
         }else{
             table.putItem(feedDTO);
             System.out.println("Status was added to feed");
+        }
+    }
+
+    @Override
+    public void addFeedBatch(List<FeedDTO> feedDTOList) {
+        List<FeedDTO> batchToWrite = new ArrayList<>();
+        for (FeedDTO u : feedDTOList) {
+            batchToWrite.add(u);
+
+            if (batchToWrite.size() == 25) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfFeedDTOS(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfFeedDTOS(batchToWrite);
+        }
+
+
+    }
+
+    private void writeChunkOfFeedDTOS(List<FeedDTO> batchToWrite) {
+        if(batchToWrite.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<FeedDTO> table = getEnhancedClient().table(TableName, TableSchema.fromBean(FeedDTO.class));
+        WriteBatch.Builder<FeedDTO> writeBuilder = WriteBatch.builder(FeedDTO.class).mappedTableResource(table);
+        for (FeedDTO item : batchToWrite) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = getEnhancedClient().batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfFeedDTOS(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
 

@@ -1,9 +1,13 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -23,13 +27,6 @@ import edu.byu.cs.tweeter.server.dao.dto.FeedDTO;
 import edu.byu.cs.tweeter.server.dao.dto.StoryDTO;
 import edu.byu.cs.tweeter.server.dao.dto.UserDTO;
 import edu.byu.cs.tweeter.util.Pair;
-
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.amazonaws.services.sqs.model.MessageAttributeValue;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.amazonaws.services.sqs.model.SendMessageResult;
-import com.google.gson.Gson;
 
 
 public class StatusService extends BaseService {
@@ -53,36 +50,6 @@ public class StatusService extends BaseService {
         SendMessageResult sendMessageResult = getSQSClient().sendMessage(sendMessageRequest);
         String msgId = sendMessageResult.getMessageId();
         System.out.println("Message ID: " + msgId);
-
-//        FollowDAO followDAO = daoFactory.makeFollowDAO();
-//        FeedDAO feedDAO = daoFactory.makeFeedDAO();
-//        UserDAO userDAO = daoFactory.makeUserDao();
-//        try {
-//            UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
-//            if(userDTO.getFollowerCount() == 0){
-//                return new PostStatusResponse(authToken);
-//            }
-//            System.out.println("This is the alias we are getting the followers for:"
-//                    +storyDTO.getUserAlias());
-//            List<FollowDTO> followDTOList = followDAO.getFollowers(storyDTO.getUserAlias(),
-//                    10,null).getFirst();
-//            System.out.println(userDTO.getFirstName() +"s followersize: "+followDTOList.size());
-//            System.out.println("followerHandle:"+followDTOList.get(0).getFollower_handle());
-//            System.out.println("followeeHandle:"+followDTOList.get(0).getFollowee_handle());
-//            List<FeedDTO> feedDTOList = new ArrayList<>();
-//            for(FollowDTO followDTO:followDTOList){
-//                FeedDTO feedDTO = convertStoryDtoToFeedDto(storyDTO,followDTO.getFollower_handle());
-//                feedDTOList.add(feedDTO);
-//            }
-//            for(FeedDTO ele:feedDTOList){
-//                feedDAO.addStatus(ele);
-//            }
-//
-//        }catch (DataAccessException ex){
-//            System.out.println(ex.getMessage());
-//            throw new RuntimeException(ex.getMessage());
-//        }
-
 
 
         return new PostStatusResponse(authToken);
@@ -142,7 +109,7 @@ public class StatusService extends BaseService {
 
     public Status convertStoryDtoToStatus(StoryDTO storyDTO, DAOFactory daoFactory) {
         UserDAO userDAO = daoFactory.makeUserDao();
-        User user = null;
+        User user;
         try{
             UserDTO userDTO = userDAO.getItem(storyDTO.getUserAlias());
             user = convertUserDTO(userDTO);
@@ -151,18 +118,16 @@ public class StatusService extends BaseService {
             throw new RuntimeException("[Bad Request] Cannot get story");
         }
 
-        Status status = new Status(storyDTO.getPost(),user,
+        return new Status(storyDTO.getPost(),user,
                 storyDTO.getTimeStamp(),storyDTO.getUrls(),storyDTO.getMentions());
-        return status;
     }
 
     public StoryDTO convertStatus(Status status){
         if(status == null){
             return null;
         }
-        StoryDTO storyDTO = new StoryDTO(status.user.getAlias(),
+        return new StoryDTO(status.user.getAlias(),
                 status.timestamp,status.urls,status.mentions,status.post);
-        return  storyDTO;
     }
 
     public List<Status> convertFeedDTOList(List<FeedDTO> feedDTOList,DAOFactory daoFactory){
@@ -187,9 +152,8 @@ public class StatusService extends BaseService {
         if(status == null){
             return null;
         }
-        FeedDTO feedDTO = new FeedDTO(ownerAlias,status.user.getAlias(),status.timestamp,
+        return new FeedDTO(ownerAlias,status.user.getAlias(),status.timestamp,
                 status.urls,status.mentions,status.post);
-        return feedDTO;
     }
 
 }
