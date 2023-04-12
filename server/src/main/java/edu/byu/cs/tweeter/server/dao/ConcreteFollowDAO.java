@@ -156,7 +156,7 @@ public class ConcreteFollowDAO extends BaseDAO implements FollowDAO {
                 .queryConditional(QueryConditional.keyEqualTo(key))
                 .limit(pageSize);
 
-        System.out.println("Made request builder and key");
+
         if(isNonEmptyString(lastUserAlias)) {
             // Build up the Exclusive Start Key (telling DynamoDB where you left off reading items)
             Map<String, AttributeValue> startKey = new HashMap<>();
@@ -168,7 +168,7 @@ public class ConcreteFollowDAO extends BaseDAO implements FollowDAO {
 
 
         QueryEnhancedRequest request = requestBuilder.build();
-        System.out.println("built request");
+
         DataPage<FollowDTO> result = new DataPage<FollowDTO>();
 
         SdkIterable<Page<FollowDTO>> sdkIterable = index.query(request);
@@ -180,7 +180,6 @@ public class ConcreteFollowDAO extends BaseDAO implements FollowDAO {
                     page.items().forEach(follow -> result.getValues().add(follow));
                 });
 
-        System.out.println("about to return result");
         return result;
 
     }
@@ -252,9 +251,8 @@ public class ConcreteFollowDAO extends BaseDAO implements FollowDAO {
         assert pageSize>0;
         assert targetUserAlias != null;
 
-        System.out.println("About to get follow page");
+
         DataPage<FollowDTO> followPage = getPageOfFollowers(targetUserAlias,pageSize,lastUserAlias);
-        System.out.println("got follow page");
         List<FollowDTO> followers = followPage.getValues();
 
         boolean hasMorePages = followPage.isHasMorePages();

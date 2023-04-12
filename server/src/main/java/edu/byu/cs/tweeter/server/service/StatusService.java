@@ -29,10 +29,13 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
-
+import com.google.gson.Gson;
 
 
 public class StatusService extends BaseService {
+
+    private AmazonSQS sqs;
+    private Gson gson;
 
     public PostStatusResponse postStatus(PostStatusRequest request, DAOFactory daoFactory){
         if(request.getStatus() == null){
@@ -43,17 +46,11 @@ public class StatusService extends BaseService {
         StoryDTO storyDTO = convertStatus(request.getStatus());
         storyDAO.postStatus(storyDTO);
         String queueUrl = "https://sqs.us-east-1.amazonaws.com/240336757899/PostStatusQueue";
-        Map<String,MessageAttributeValue> data = new HashMap<>();
-        data.put("userAlias",new MessageAttributeValue().withDataType("String").withStringValue(storyDTO.getUserAlias()));
-        data.put("post",new MessageAttributeValue().withDataType("String").withStringValue(storyDTO.getPost()));
-        data.put("timeStamp",new MessageAttributeValue().withDataType("Number").withStringValue(Long.toString(storyDTO.getTimeStamp())));
-
+        String story = getGson().toJson(storyDTO);
         SendMessageRequest sendMessageRequest = new SendMessageRequest()
                 .withQueueUrl(queueUrl)
-                .withMessageBody("post")
-                .withMessageAttributes(data);
-        AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
-        SendMessageResult sendMessageResult = sqs.sendMessage(sendMessageRequest);
+                .withMessageBody(story);
+        SendMessageResult sendMessageResult = getSQSClient().sendMessage(sendMessageRequest);
         String msgId = sendMessageResult.getMessageId();
         System.out.println("Message ID: " + msgId);
 
@@ -90,6 +87,22 @@ public class StatusService extends BaseService {
 
         return new PostStatusResponse(authToken);
     }
+
+    private AmazonSQS getSQSClient(){
+        if(sqs == null){
+            sqs = AmazonSQSClientBuilder.defaultClient();
+        }
+
+        return sqs;
+    }
+
+    private Gson getGson(){
+        if(gson == null){
+            gson = new Gson();
+        }
+        return gson;
+    }
+
     
     public GetStoryResponse getStory(GetStoryRequest request, DAOFactory daoFactory){
         if(request.getTargetUserAlias() == null){
@@ -150,12 +163,6 @@ public class StatusService extends BaseService {
         StoryDTO storyDTO = new StoryDTO(status.user.getAlias(),
                 status.timestamp,status.urls,status.mentions,status.post);
         return  storyDTO;
-    }
-
-    public FeedDTO convertStoryDtoToFeedDto(StoryDTO storyDTO, String ownerAlias){
-        FeedDTO feedDTO = new FeedDTO(ownerAlias,storyDTO.getUserAlias(),storyDTO.getTimeStamp(),
-                storyDTO.getUrls(),storyDTO.getMentions(),storyDTO.getPost());
-        return feedDTO;
     }
 
     public List<Status> convertFeedDTOList(List<FeedDTO> feedDTOList,DAOFactory daoFactory){
