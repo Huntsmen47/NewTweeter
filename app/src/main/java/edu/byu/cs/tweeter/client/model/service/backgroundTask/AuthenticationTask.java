@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -59,6 +60,8 @@ public abstract class AuthenticationTask extends BackgroundTask {
             if (response.isSuccess()) {
                 setAuthenticatedUser(response.getUser());
                 setAuthToken(response.getAuthToken());
+                Cache.getInstance().setCurrUserAuthToken(response.getAuthToken());
+                Cache.getInstance().setCurrUser(response.getUser());
                 return new Pair<Boolean,String>(true,"");
             } else {
                 return new Pair<Boolean,String>(false,response.getMessage());
