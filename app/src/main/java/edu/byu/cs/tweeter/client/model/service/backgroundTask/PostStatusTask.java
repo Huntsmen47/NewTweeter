@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -40,7 +41,7 @@ public class PostStatusTask extends AuthenticatedTask {
     @Override
     protected Pair processTask() {
         try {
-        PostStatusRequest request = new PostStatusRequest(getAuthToken(),status);
+        PostStatusRequest request = new PostStatusRequest(Cache.getInstance().getCurrUserAuthToken(), status);
         PostStatusResponse response =  getServerFacade().postStatus(request, StatusService.POST_STATUS_PATH);
         if (response.isSuccess()) {
             setDateTime(response.getAuthToken().datetime);
